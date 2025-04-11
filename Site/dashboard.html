@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAICO</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet"> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    
+    <header class="navbar">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" />
+        </a>
+      
+    <div class="top-navbar">
+        <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar" />
+        </div>
+    
+        <div class="top-right">
+        <a href="login.html">
+        <button class="login-button">
+            <img src="assets/login.png" alt="Login Icon" class="icon" />
+            Login
+        </button>
+        </a>
+        </div>
+    </div>
+  
+    <div class="bottom-navbar">
+    <nav class="nav-links">
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+        Dashboard
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+        Timeline
+      </a>
+      <a href="teams.html">
+        <img src="assets/teams.png" alt="Teams Icon" class="icon" />
+        Teams
+      </a>
+      <a href="projects.html">
+        <img src="assets/projects.png" alt="Projects Icon" class="icon" />
+        Projects
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main class="dashboard-container">
+    <div class="top-container">
+        <div class="left-container">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="right-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+    <div class="bottom-container">
+        <h2>Task Overview</h2>
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+            </tr>
+            <tr>
+                <td>Sample Task 1</td>
+                <td>In Progress</td>
+                <td>High</td>
+                <td>2024-04-10</td>
+            </tr>
+            <tr>
+                <td>Sample Task 2</td>
+                <td>Completed</td>
+                <td>Medium</td>
+                <td>2024-04-12</td>
+            </tr>
+        </table>
+    </div>
+</main>
+
+<script>
+    const barColors = ['#ef4444', '#facc15', '#10b981']; // Tailwind-style pleasant red, yellow, green
+    const textColor = 'white';
+  
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['High', 'Medium', 'Low'],
+        datasets: [{
+          label: 'Task Priority Distribution',
+          data: [5, 8, 3],
+          backgroundColor: barColors,
+          borderWidth: 0
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              color: textColor
+            }
+          },
+          title: {
+            display: true,
+            text: 'Task Priority Distribution',
+            color: textColor,
+            font: {
+              size: 18
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: textColor
+            },
+            grid: {
+              color: '#6b7280'
+            }
+          },
+          y: {
+            ticks: {
+              color: textColor
+            },
+            grid: {
+              color: '#6b7280'
+            }
+          }
+        }
+      }
+    });
+  
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['High', 'Medium', 'Low'],
+        datasets: [{
+          data: [5, 8, 3],
+          backgroundColor: barColors,
+          borderWidth: 0 // removes white outline
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              color: textColor
+            }
+          },
+          title: {
+            display: true,
+            text: 'Priority Breakdown',
+            color: textColor,
+            font: {
+              size: 18
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

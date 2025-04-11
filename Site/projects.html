@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAICO</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+    <header class="navbar">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" />
+        </a>
+      
+    <div class="top-navbar">
+        <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar" />
+        </div>
+    
+        <div class="top-right">
+            <a href="login.html">
+            <button class="login-button">
+                <img src="assets/login.png" alt="Login Icon" class="icon" />
+                Login
+            </button>
+            </a>
+            </div>
+    </div>
+  
+    <div class="bottom-navbar">
+    <nav class="nav-links">
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+        Dashboard
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+        Timeline
+      </a>
+      <a href="teams.html">
+        <img src="assets/teams.png" alt="Teams Icon" class="icon" />
+        Teams
+      </a>
+      <a href="projects.html">
+        <img src="assets/projects.png" alt="Projects Icon" class="icon" />
+        Projects
+      </a>
+    </nav>
+  </div>
+</header>
+
+<div class="center-container">
+    <div class="project-card">
+      <div class="section top-section">
+        <div class="project-name"><a href="project.html">Project Name</a></div>
+        <div class="progress-wrapper">
+          <div class="progress-bar">
+            <div class="progress" style="width: 70%;"></div>
+          </div>
+          <div class="progress-percent">70%</div>
+        </div>
+      </div>
+
+      <div class="section middle-section">
+        <div class="last-edited">Last edited: April 10, 2025</div>
+        <div class="dates">
+          Start: April 1, 2025<br/>
+          Est. End: May 15, 2025
+        </div>
+      </div>
+
+      <div class="section bottom-section" id="toggleButton">
+        <div class="last-notification">Last notification: F ix build error</div>
+        <div class="unread-count">2 unread</div>
+      </div>
+
+      <div class="hidden-details" id="details">
+        <div><strong>Current Phase:</strong> Back-End Development</div>
+        <div><strong>Status:</strong> On Track</div>
+        <div><strong>Description:</strong> The [Software Project Name] is progressing according to schedule
+            with key milestones achieved in the current reporting period. The development team has completed [specific accomplishments], and testing is ...</div>
+        <div><strong>Notifications:</strong></div>
+        <div>1. Correct the spacing of elements on page X</div>
+        <div>2. Fix database error</div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById("toggleButton");
+    const details = document.getElementById("details");
+
+    toggleBtn.addEventListener("click", () => {
+      details.classList.toggle("show");
+    });
+  </script>
+
+</body>
+</html>

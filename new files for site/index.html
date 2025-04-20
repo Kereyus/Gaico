@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAICO</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+
+<header class="navbar">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" />
+        </a>
+      
+    <div class="top-navbar">
+        <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar" />
+        </div>
+    
+        <div class="top-right" id="auth-control"></div>
+
+    </div>
+  
+    <div class="bottom-navbar">
+    <nav class="nav-links">
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+        Dashboard
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+        Timeline
+      </a>
+      <a href="teams.html">
+        <img src="assets/teams.png" alt="Teams Icon" class="icon" />
+        Teams
+      </a>
+      <a href="projects.html">
+        <img src="assets/projects.png" alt="Projects Icon" class="icon" />
+        Projects
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main class="homepage">
+    <h1 class="welcome-title">WELCOME TO</h1>
+    <img src="assets/logo2.png" alt="Welcome Logo" class="hero-logo" />
+    <p class="tagline">Making project management look easy</p>
+    <p class="since">Since 2025</p>
+    
+    <input type="text" placeholder="Search..." class="search-bar home-search" />
+  
+    <a href="dashboard.html" class="dashboard-link">
+      Head to the Dashboard to get started!
+    </a>
+  </main>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("access_token");
+      window.location.href = "index.html";
+    }
+  
+    const authControl = document.getElementById("auth-control");
+    const token = localStorage.getItem("access_token");
+  
+    if (token) {
+      authControl.innerHTML = `
+        <button class="login-button" onclick="logout()">Logout</button>`;
+    } else {
+      authControl.innerHTML = `
+        <a href="login.html">
+          <button class="login-button">Login</button>
+        </a>`;
+    }
+  </script>
+  
+
+</body>
+</html>

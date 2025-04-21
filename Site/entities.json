@@ -32,12 +32,12 @@
   },
   "TimelineEvent": {
     "fields": ["id", "date", "title", "description"],
-    "actions": ["create", "update", "delete", "getByDateRange", "getByProject"],
+    "actions": ["create", "update", "delete", "getByProject"],
     "relationships": {}
   },
   "Notification": {
     "fields": ["id", "projectId", "message", "timestamp", "read"],
-    "actions": ["send", "markRead", "delete", "getByProject"],
+    "actions": ["send", "markRead", "getByProject"],
     "relationships": {
       "project": "Project"
     }

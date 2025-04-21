@@ -19,14 +19,8 @@
         <input type="text" placeholder="Search..." class="search-bar" />
         </div>
     
-        <div class="top-right">
-        <a href="login.html">
-        <button class="login-button">
-            <img src="assets/login.png" alt="Login Icon" class="icon" />
-            Login
-        </button>
-        </a>
-        </div>
+        <div class="top-right" id="auth-control"></div>
+
     </div>
   
     <div class="bottom-navbar">
@@ -63,6 +57,27 @@
       Head to the Dashboard to get started!
     </a>
   </main>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("access_token");
+      window.location.href = "index.html";
+    }
+  
+    const authControl = document.getElementById("auth-control");
+    const token = localStorage.getItem("access_token");
+  
+    if (token) {
+      authControl.innerHTML = `
+        <button class="login-button" onclick="logout()">Logout</button>`;
+    } else {
+      authControl.innerHTML = `
+        <a href="login.html">
+          <button class="login-button">Login</button>
+        </a>`;
+    }
+  </script>
+  
 
 </body>
 </html>

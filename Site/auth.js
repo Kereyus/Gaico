@@ -1,5 +1,3 @@
-// --- AUTH FUNCTIONS ---
-
 const API_BASE = "http://localhost:8080"; // will replace with backend base thing
 
 // REGISTER

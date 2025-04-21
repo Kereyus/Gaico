@@ -161,99 +161,96 @@
     </style>
 </head>
 <body>
-    <header class="navbar">
-        <a href="index.html" class="logo-container">
-            <img src="assets/logo.png" alt="Logo" class="logo-img" />
-        </a>
-        
-        <div class="top-navbar">
-            <div class="top-left">
-                <input type="text" placeholder="Search..." class="search-bar" />
-            </div>
-        
-            <div class="top-right">
-                <a href="login.html">
-                    <button class="login-button">
-                        <img src="assets/login.png" alt="Login Icon" class="icon" />
-                        Login
-                    </button>
-                </a>
-            </div>
-        </div>
-    
-        <div class="bottom-navbar">
-            <nav class="nav-links">
-                <a href="dashboard.html">
-                    <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
-                    Dashboard
-                </a>
-                <a href="timeline.html">
-                    <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
-                    Timeline
-                </a>
-                <a href="teams.html">
-                    <img src="assets/teams.png" alt="Teams Icon" class="icon" />
-                    Teams
-                </a>
-                <a href="projects.html">
-                    <img src="assets/projects.png" alt="Projects Icon" class="icon" />
-                    Projects
-                </a>
-            </nav>
-        </div>
-    </header>
+    <script>
+        const token = localStorage.getItem("access_token");
+      
+        if (!token) {
+          // Not logged in, redirect to login page
+          window.location.href = "login.html";
+        } else {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const now = Date.now();
+          if (payload.exp * 1000 < now) {
+            // Token expired
+            localStorage.removeItem("access_token");
+            alert("Session expired. Please log in again.");
+            window.location.href = "login.html";
+          }
+        }
+      </script>
+      
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <img src="assets/logo.png" alt="Logo" class="logo-img" />
+    </a>
+    <div class="top-navbar">
+      <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar" />
+      </div>
+      <div class="top-right" id="auth-control"></div>
 
-    <div class="container">
-        <div class="header">
-            <h1>Teams Management</h1>
-        </div>
-        
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="team-id">Team ID</th>
-                        <th class="team-name">Team Name</th>
-                        <th class="product-owner">Product Owner</th>
-                        <th class="product-manager">Product Manager</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>TM001</td>
-                        <td>Alpha Development</td>
-                        <td>Sarah Johnson</td>
-                        <td>Michael Chen</td>
-                    </tr>
-                    <tr>
-                        <td>TM002</td>
-                        <td>Beta Testing</td>
-                        <td>David Wilson</td>
-                        <td>Emily Rodriguez</td>
-                    </tr>
-                    <tr>
-                        <td>TM003</td>
-                        <td>Gamma Operations</td>
-                        <td>Robert Taylor</td>
-                        <td>Jennifer Lee</td>
-                    </tr>
-                    <tr>
-                        <td>TM004</td>
-                        <td>Delta Design</td>
-                        <td>Jessica Brown</td>
-                        <td>Daniel Kim</td>
-                    </tr>
-                    <tr>
-                        <td>TM005</td>
-                        <td>Epsilon Support</td>
-                        <td>Christopher Davis</td>
-                        <td>Amanda Martinez</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </div>
-    
-    <script src="teams.js"></script>
+    <div class="bottom-navbar">
+      <nav class="nav-links">
+        <a href="dashboard.html"><img src="assets/dashboard.png" class="icon" /> Dashboard</a>
+        <a href="timeline.html"><img src="assets/timeline.png" class="icon" /> Timeline</a>
+        <a href="teams.html"><img src="assets/teams.png" class="icon" /> Teams</a>
+        <a href="projects.html"><img src="assets/projects.png" class="icon" /> Projects</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header">
+      <h1>Teams Management</h1>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+      <form onsubmit="createTeam(event)">
+        <h3>Create New Team</h3>
+        <input name="name" placeholder="Team Name" required />
+        <input name="owner" placeholder="Product Owner" required />
+        <input name="manager" placeholder="Product Manager" required />
+        <button type="submit" class="login-button">Create Team</button>
+      </form>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="team-id">Team ID</th>
+            <th class="team-name">Team Name</th>
+            <th class="product-owner">Product Owner</th>
+            <th class="product-manager">Product Manager</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("access_token");
+      window.location.href = "index.html";
+    }
+  
+    const authControl = document.getElementById("auth-control");
+  
+    if (token) {
+      authControl.innerHTML = `
+        <button class="login-button" onclick="logout()">Logout</button>`;
+    } else {
+      authControl.innerHTML = `
+        <a href="login.html">
+          <button class="login-button">Login</button>
+        </a>`;
+    }
+  </script>
+  
+
+  <script src="teams.js"></script>
 </body>
 </html>

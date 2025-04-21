@@ -8,7 +8,9 @@ async function fetchProjects() {
 
   const projects = await res.json();
   const container = document.querySelector(".center-container");
-  container.innerHTML = ""; // Clear previous
+  const cards = container.querySelectorAll(".project-card");
+  cards.forEach(card => card.remove());
+
 
   projects.forEach(project => {
     const card = document.createElement("div");
@@ -127,31 +129,3 @@ window.onload = () => {
   //addCreateForm();
   fetchProjects();
 };
-
-
-let formVisible = false;
-
-function toggleCreateForm() {
-  const existing = document.getElementById("create-project-form");
-  if (existing) {
-    existing.remove();
-    formVisible = false;
-    return;
-  }
-
-  const container = document.querySelector(".center-container");
-  const formWrapper = document.createElement("div");
-  formWrapper.id = "create-project-form";
-  formWrapper.innerHTML = `
-    <form onsubmit="createProject(event)" style="margin-bottom: 20px;">
-      <h3>Create New Project</h3>
-      <input name="name" placeholder="Project Name" required /><br/>
-      <textarea name="description" placeholder="Description" required></textarea><br/>
-      <input type="date" name="startDate" required />
-      <input type="date" name="endDate" required />
-      <button type="submit" class="login-button">Create</button>
-    </form>
-  `;
-  container.insertBefore(formWrapper, container.children[1]);
-  formVisible = true;
-}

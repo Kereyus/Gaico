@@ -515,3 +515,160 @@ html, body {
     max-width: 300px;
     margin-top: 10px;
   }
+
+  .form-card {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: #544F4F;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .form-card form input,
+  .form-card form textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    background-color: #6D6D6F;
+    color: white;
+  }
+  
+  .form-card form textarea {
+    resize: vertical;
+  }
+  
+  .form-card {
+    width: 900px;
+    min-height: 300px;
+    margin: 30px auto;
+    padding: 30px 40px;
+    background-color: #544F4F;
+    border: 1px solid white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: fadeInScale 0.3s ease;
+  }
+
+  .date-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+  
+  .date-input-group {
+    flex: 1;
+  }
+  
+  .date-input-group input {
+    width: 100%;
+  }
+  
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+  .form-card form input,
+  .form-card form textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    background-color: #6D6D6F;
+    color: white;
+  }
+  
+  .form-card form textarea {
+    resize: vertical;
+  }
+  
+  .form-label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .form-layout h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: white;
+  }
+
+  .form-columns {
+    display: flex;
+    gap: 40px;
+  }
+
+  .form-left,
+.form-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-left input,
+.form-left textarea,
+.form-right input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  background-color: #6D6D6F;
+  color: white;
+}
+
+.form-left textarea {
+  resize: vertical;
+  height: 110px;
+}
+
+.form-label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: white;
+}

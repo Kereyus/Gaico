@@ -16,18 +16,7 @@
   <script>
     const token = localStorage.getItem("access_token");
 
-    if (!token) {
-      // Not logged in, redirect to login page
-      window.location.href = "login.html";
-    } else {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const now = Date.now();
-      if (payload.exp * 1000 < now) {
-        localStorage.removeItem("access_token");
-        alert("Session expired. Please log in again.");
-        window.location.href = "login.html";
-      }
-    }
+    
   </script>
 
   <header class="navbar">
@@ -66,24 +55,53 @@
   </header>
 
   <div class="center-container">
-    <div style="text-align: center; margin: 20px 0;">
-      <button onclick="document.getElementById('create-project-form').classList.toggle('hidden')" class="login-button">
-        + Create Project
-      </button>
+    <div class="center-container" style="flex-direction: column;">
+      <!-- Toggle Button -->
+      <div id="create-toggle-button" style="text-align: center; margin: 20px 0;">
+        <button onclick="toggleCreateForm(true)" class="login-button">+ Create Project</button>
+      </div>
+    
+      <!-- Form Card -->
+      <div id="create-project-card" class="form-card hidden">
+        <button class="close-button" onclick="toggleCreateForm(false)">✖</button>
+        <form onsubmit="createProject(event)" class="form-layout">
+          <h3>Create New Project</h3>
+          <div class="form-columns">
+            <div class="form-left">
+              <input name="name" placeholder="Project Name" required /><br/>
+              <textarea name="description" placeholder="Description" required></textarea>
+            </div>
+            <div class="form-right">
+              <label for="start-date" class="form-label">Start Date</label>
+              <input type="date" name="startDate" id="start-date" required />
+        
+              <label for="end-date" class="form-label">Estimated End Date</label>
+              <input type="date" name="endDate" id="end-date" required />
+            </div>
+          </div>
+          <div style="margin-top: 20px; text-align: right;">
+            <button type="submit" class="login-button">Create</button>
+          </div>
+        </form>        
     </div>
-
-    <div id="create-project-form" class="hidden" style="text-align: center; margin-bottom: 30px;">
-      <form onsubmit="createProject(event)" style="max-width: 600px; margin: auto;">
-        <h3>Create New Project</h3>
-        <input name="name" placeholder="Project Name" required /><br/>
-        <textarea name="description" placeholder="Description" required></textarea><br/>
-        <input type="date" name="startDate" required />
-        <input type="date" name="endDate" required />
-        <br/><br/>
-        <button type="submit" class="login-button">Create</button>
-      </form>
-    </div>
+    
   </div>
+
+  <script>
+    function toggleCreateForm(show) {
+      const formCard = document.getElementById("create-project-card");
+      const toggleButton = document.getElementById("create-toggle-button");
+  
+      if (show) {
+        formCard.classList.remove("hidden");
+        toggleButton.classList.add("hidden");
+      } else {
+        formCard.classList.add("hidden");
+        toggleButton.classList.remove("hidden");
+      }
+    }
+  </script>
+  
 
   <script>
     function logout() {

@@ -672,3 +672,64 @@ html, body {
   font-weight: bold;
   color: white;
 }
+
+/* Teams Table Styles */
+.teams-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+} 
+
+.teams-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.teams-table-container {
+    background-color: #544F4F;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.teams-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #37373A;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.teams-table-container th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #555;
+    color: white;
+}
+
+.teams-table-container th {
+    background-color: #141212;
+    color: white;
+    font-weight: 600;
+}
+
+.teams-table-container tr:hover {
+    background-color: #4a4a4a;
+}
+
+.teams-table-container tr:last-child td {
+    border-bottom: none;
+}
+
+.team-id {
+    width: 10%;
+}
+
+.team-name {
+    width: 30%;
+}
+
+.product-owner, .product-manager {
+    width: 30%;
+}

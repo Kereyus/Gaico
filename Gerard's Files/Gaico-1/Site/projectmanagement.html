@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management - GAICO</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <script>
+    // Authentication check
+    const token = localStorage.getItem("access_token");
+    if (!token) window.location.href = "login.html";
+  </script>
+
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <img src="assets/logo.png" alt="Logo" class="logo-img" />
+    </a>
+
+    <div class="top-navbar">
+      <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar" />
+      </div>
+      <div class="top-right" id="auth-control"></div>
+    </div>
+
+    <div class="bottom-navbar">
+      <nav class="nav-links">
+        <a href="projectlisting.html">
+          <img src="assets/projects.png" alt="List of Projects Icon" class="icon" />
+          Home
+        </a>
+        <a href="dashboard.html">
+          <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+          Dashboard
+        </a>
+        <a href="timeline.html">
+          <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+          Timeline
+        </a>
+        <a href="teams.html">
+          <img src="assets/teams.png" alt="Teams Icon" class="icon" />
+          Teams
+        </a>
+        <a href="projects.html">
+          <img src="assets/projects.png" alt="Projects Icon" class="icon" />
+          New project
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="project-management-container">
+    <aside class="project-phases">
+      <h3>Project Phases</h3>
+      <nav class="phase-nav">
+        <a href="#" class="phase-link active" data-phase="initiating">
+          <span class="phase-number">1</span>
+          Initiating
+        </a>
+        <a href="#" class="phase-link" data-phase="planning">
+          <span class="phase-number">2</span>
+          Planning
+        </a>
+        <a href="#" class="phase-link" data-phase="executing">
+          <span class="phase-number">3</span>
+          Executing
+        </a>
+        <a href="#" class="phase-link" data-phase="monitoring">
+          <span class="phase-number">4</span>
+          Monitoring & Controlling
+        </a>
+        <a href="#" class="phase-link" data-phase="closing">
+          <span class="phase-number">5</span>
+          Closing
+        </a>
+      </nav>
+
+      <div class="project-info">
+        <h4>Project Details</h4>
+        <div id="projectDetails"></div>
+      </div>
+    </aside>
+
+    <main class="phase-content" id="phaseContent">
+      <div class="phase-header">
+        <h2 id="currentPhaseTitle">Initiating Phase</h2>
+        </div>
+
+      <div id="dynamicContent">
+        <div class="initiating-content">
+          <section class="project-charter">
+            <h3>Project Charter</h3>
+            <div class="charter-form">
+              <div class="form-group">
+                <label>Project Title</label>
+                <input type="text" value="New Marketing Campaign" readonly>
+              </div>
+              <div class="form-group">
+                <label>Project Manager</label>
+                <input type="text" value="John Doe" readonly>
+              </div>
+              <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" value="2023-10-01" readonly>
+              </div>
+              <div class="form-group">
+                <label>End Date</label>
+                <input type="date" value="2023-12-31" readonly>
+              </div>
+              <div class="form-group">
+                <label>Project Description</label>
+                <textarea readonly>Launch new marketing campaign for Q4 2023</textarea>
+              </div>
+              <button class="edit-btn">Edit Charter</button>
+            </div>
+          </section>
+
+          <section class="stakeholders">
+            <h3>Stakeholders</h3>
+            <table class="stakeholder-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Contact</th>
+                  <th>Influence</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sarah Johnson</td>
+                  <td>Marketing Director</td>
+                  <td>sarah@company.com</td>
+                  <td>High</td>
+                  <td>
+                    <button class="action-btn edit">Edit</button>
+                    <button class="action-btn delete">Remove</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Michael Chen</td>
+                  <td>Finance Manager</td>
+                  <td>michael@company.com</td>
+                  <td>Medium</td>
+                  <td>
+                    <button class="action-btn edit">Edit</button>
+                    <button class="action-btn delete">Remove</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="add-stakeholder-btn">Add Stakeholder</button>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Get project ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('id');
+
+    if (!projectId) {
+      alert('No project specified');
+      window.location.href = 'projects.html';
+    }
+
+    // Current phase (default to initiating)
+    let currentPhase = 'initiating';
+
+    // Load project data and initial phase content
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadProjectData();
+      loadPhaseContent(currentPhase);
+
+      // Set up phase navigation
+      setupPhaseNavigation();
+    });
+
+    // Set up phase navigation click handlers
+    // Set up phase navigation click handlers
+    function setupPhaseNavigation() {
+      const phaseLinks = document.querySelectorAll('.phase-link');
+
+      phaseLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Update active state
+          phaseLinks.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+
+          // Get the data-phase attribute
+          const phase = this.dataset.phase;
+
+          // Navigate to the corresponding HTML page
+          if (phase === 'planning') {
+            window.location.href = 'planning.html?id=' + projectId;
+          } else if (phase === 'executing') {
+            window.location.href = 'executing.html?id=' + projectId;
+          } else if (phase === 'monitoring') {
+            window.location.href = 'monitoring.html?id=' + projectId;
+          } else if (phase === 'closing') {
+            window.location.href = 'closing.html?id=' + projectId;
+          } else if (phase === 'initiating') {
+            // Optionally, you can reload the current page or do nothing
+            // if you want to stay on the same page for the initiating phase
+            window.location.href = '?id=' + projectId; // Reload current page
+          }
+        });
+      });
+    }
+
+    // Load content for a specific phase
+    async function loadPhaseContent(phase) {
+      try {
+        // Update phase title
+        document.getElementById('currentPhaseTitle').textContent =
+          `${phase.charAt(0).toUpperCase() + phase.slice(1)} Phase`;
+
+        // Show loading state
+        document.getElementById('dynamicContent').innerHTML = '<p>Loading...</p>';
+
+        // Load the appropriate content
+        let content = '';
+
+        switch(phase) {
+          case 'initiating':
+            content = await loadInitiatingContent();
+            break;
+          case 'planning':
+            content = await loadPlanningContent();
+            break;
+          // Add cases for other phases...
+          default:
+            content = `<p>Content for ${phase} phase will be displayed here.</p>`;
+        }
+
+        document.getElementById('dynamicContent').innerHTML = content;
+      } catch (error) {
+        console.error('Error loading phase content:', error);
+        document.getElementById('dynamicContent').innerHTML =
+          `<p class="error">Error loading content. Please try again.</p>`;
+      }
+    }
+
+    // Load initiating phase content
+    async function loadInitiatingContent() {
+      // In a real app, you would fetch this from the server
+      // For now, we'll use template strings
+      return `
+        <div class="initiating-content">
+          <section class="project-charter">
+            <h3>Project Charter</h3>
+            <div class="charter-form">
+              <div class="form-group">
+                <label>Project Title</label>
+                <input type="text" value="New Marketing Campaign" readonly>
+              </div>
+              <div class="form-group">
+                <label>Project Manager</label>
+                <input type="text" value="John Doe" readonly>
+              </div>
+              <div class="form-group">
+                <label>Start Date</label>
+                <input type="date" value="2023-10-01" readonly>
+              </div>
+              <div class="form-group">
+                <label>End Date</label>
+                <input type="date" value="2023-12-31" readonly>
+              </div>
+              <div class="form-group">
+                <label>Project Description</label>
+                <textarea readonly>Launch new marketing campaign for Q4 2023</textarea>
+              </div>
+              <button class="edit-btn">Edit Charter</button>
+            </div>
+          </section>
+
+          <section class="stakeholders">
+            <h3>Stakeholders</h3>
+            <table class="stakeholder-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Contact</th>
+                  <th>Influence</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sarah Johnson</td>
+                  <td>Marketing Director</td>
+                  <td>sarah@company.com</td>
+                  <td>High</td>
+                  <td>
+                    <button class="action-btn edit">Edit</button>
+                    <button class="action-btn delete">Remove</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Michael Chen</td>
+                  <td>Finance Manager</td>
+                  <td>michael@company.com</td>
+                  <td>Medium</td>
+                  <td>
+                    <button class="action-btn edit">Edit</button>
+                    <button class="action-btn delete">Remove</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="add-stakeholder-btn">Add Stakeholder</button>
+          </section>
+        </div>
+      `;
+    }
+
+    // Load planning phase content (placeholder)
+    async function loadPlanningContent() {
+      return `
+        <div class="planning-content">
+          <h3>Planning Phase Content</h3>
+          <p>This would contain project planning components like:</p>
+          <ul>
+            <li>Scope definition</li>
+            <li>Schedule planning</li>
+            <li>Budget estimation</li>
+            <li>Risk management</li>
+          </ul>
+        </div>
+      `;
+    }
+
+    // Load project data
+    async function loadProjectData() {
+      try {
+        // In a real app, you would fetch this from your API
+        // For demonstration, we'll use mock data
+        const project = {
+          id: projectId,
+          name: "New Marketing Campaign",
+          managerName: "John Doe",
+          status: "In Progress",
+          startDate: "2023-10-01",
+          endDate: "2023-12-31",
+          progress: 20 // This will not be displayed
+        };
+
+        // Display project details
+        document.getElementById('projectDetails').innerHTML = `
+          <p><strong>${project.name}</strong></p>
+          <p>Manager: ${project.managerName || 'Not assigned'}</p>
+          <p>Status: <span class="status-${project.status.toLowerCase().replace(' ', '-')}">${project.status}</span></p>
+          <p>Start: ${new Date(project.startDate).toLocaleDateString()}</p>
+          <p>End: ${new Date(project.endDate).toLocaleDateString()}</p>
+        `;
+
+        // We are no longer updating the progress bar or text
+      } catch (error) {
+        console.error('Error loading project:', error);
+      }
+    }
+  </script>
+</body>
+</html>

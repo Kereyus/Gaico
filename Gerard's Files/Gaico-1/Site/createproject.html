@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create New Project - GAICO</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  
+  <script>
+    const token = localStorage.getItem("access_token");
+  
+    if (!token) {
+      window.location.href = "login.html";
+    } else {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Date.now();
+      if (payload.exp * 1000 < now) {
+        localStorage.removeItem("access_token");
+        alert("Session expired. Please log in again.");
+        window.location.href = "login.html";
+      }
+    }
+  </script>
+
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <img src="assets/logo.png" alt="Logo" class="logo-img">
+    </a>
+
+    <div class="top-navbar">
+      <div class="top-left">
+        <input type="text" placeholder="Search..." class="search-bar">
+      </div>
+      <div class="top-right" id="auth-control"></div>
+    </div>
+
+    <div class="bottom-navbar">
+      <nav class="nav-links">
+        <a href="dashboard.html">
+          <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon">
+          Dashboard
+        </a>
+        <a href="timeline.html">
+          <img src="assets/timeline.png" alt="Timeline Icon" class="icon">
+          Timeline
+        </a>
+        <a href="teams.html">
+          <img src="assets/teams.png" alt="Teams Icon" class="icon">
+          Teams
+        </a>
+        <a href="projects.html">
+          <img src="assets/projects.png" alt="Projects Icon" class="icon">
+          Projects
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="project-form-container">
+    <h1>Create New Project</h1>
+    
+    <form id="projectForm" class="project-form">
+      <div class="form-group">
+        <label for="projectName">Project Name</label>
+        <input type="text" id="projectName" name="projectName" required>
+      </div>
+      
+      <div class="contacts-section">
+        <h3>Project Contacts</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="projectManager">Project Manager *</label>
+            <select id="projectManager" name="projectManager" required>
+              <option value="">Select Project Manager</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="projectController">Project Controller *</label>
+            <select id="projectController" name="projectController" required>
+              <option value="">Select Project Controller</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+    <!-- this is for the adding of team members using the invite and plus sign -->
+    <div class="form-group">
+        <label for="teamMembers">Team Members</label>
+        
+        <div class="invite-controls">
+          <input type="email" id="teamMemberEmail" class="email-input" placeholder="Enter email address">
+          <button type="button" class="btn-invite" onclick="addTeamMember()">
+            <span class="plus-icon">+</span> Add
+          </button>
+        </div>
+        
+        <div class="email-tags-container" id="emailTags">
+          <!-- Email tags will appear here -->
+        </div>
+        
+        <button type="button" class="btn-invite-more" onclick="openInviteModal()">
+          <span class="plus-icon">+</span> Invite More Team Members
+        </button>
+        
+        <input type="hidden" id="teamMembers" name="teamMembers">
+      </div>
+      
+      <!-- Invite Modal -->
+      <div id="inviteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;" class="invite-modal">
+        <div style="background-color: #666; color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);" class="modal-content">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="modal-header">
+            <h3 style="margin: 0;">Invite Multiple Team Members</h3>
+            <button style="background: none; border: none; color: #fff; font-size: 24px; cursor: pointer;" onclick="closeInviteModal()">&times;</button>
+          </div>
+          <textarea style="width: 100%; height: 100px; padding: 10px; border: none; border-radius: 4px; resize: vertical; font-size: 14px;" placeholder="Enter multiple email addresses, separated by commas or new lines"></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;" class="modal-actions">
+            <button type="button" style="padding: 8px 16px; background-color: #bbb; color: #333; border: none; border-radius: 4px; cursor: pointer;" onclick="closeInviteModal()">Cancel</button>
+            <button type="button" style="padding: 8px 16px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer;" onclick="processBulkInvite()">Add Members</button>
+          </div>
+        </div>
+      </div>
+      
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="endDate">End Date</label>
+          <input type="date" id="endDate" name="endDate" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="projectStatus">Project Status</label>
+        <select id="projectStatus" name="projectStatus" required>
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="On Hold">On Hold</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="projectDescription">Project Description</label>
+        <textarea id="projectDescription" name="projectDescription" rows="4"></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create Project</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='projects.html'">Cancel</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("access_token");
+      window.location.href = "index.html";
+    }
+  
+    const authControl = document.getElementById("auth-control");
+    if (token) {
+      authControl.innerHTML = `<button class="login-button" onclick="logout()">Logout</button>`;
+    } else {
+      authControl.innerHTML = `<a href="login.html"><button class="login-button">Login</button></a>`;
+    }
+
+    async function populateUserDropdowns() {
+      try {
+        const response = await fetch('/api/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const users = await response.json();
+        
+        const managerSelect = document.getElementById('projectManager');
+        const controllerSelect = document.getElementById('projectController');
+        const teamSelect = document.getElementById('teamMembers');
+
+        users.forEach(user => {
+          const option = new Option(`${user.name} (${user.role})`, user.id);
+          
+          if (user.role.toLowerCase().includes('manager')) {
+            managerSelect.add(new Option(option.text, option.value));
+          }
+          if (user.role.toLowerCase().includes('controller')) {
+            controllerSelect.add(new Option(option.text, option.value));
+          }
+          teamSelect.add(option.cloneNode(true));
+        });
+      } catch (error) {
+        console.error('Error loading users:', error);
+        alert('Failed to load team data');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      populateUserDropdowns();
+      
+      // Set default dates
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('startDate').value = today;
+      
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 30);
+      document.getElementById('endDate').value = futureDate.toISOString().split('T')[0];
+    });
+    document.getElementById('projectForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const projectData = {
+          name: document.getElementById('projectName').value,
+          managerId: document.getElementById('projectManager').value,
+          controllerId: document.getElementById('projectController').value,
+          teamMemberIds: Array.from(document.getElementById('teamMembers').selectedOptions).map(opt => opt.value),
+          startDate: document.getElementById('startDate').value,
+          endDate: document.getElementById('endDate').value,
+          status: document.getElementById('projectStatus').value,
+          description: document.getElementById('projectDescription').value
+        };
+        
+        try {
+          const response = await fetch('/api/projects', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(projectData)
+          });
+          
+          if (response.ok) {
+            const project = await response.json();
+            // Redirect to project management dashboard
+            window.location.href = `project-management.html?id=${project.id}`;
+          } else {
+            throw new Error('Failed to create project');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error creating project. Please try again.');
+        }
+      });
+      // this is for the inviting of team members using email addresses
+function addEmail() {
+    const emailInput = document.getElementById('teamMemberEmail');
+    const email = emailInput.value.trim();
+    
+    if (!email) return;
+    
+    if (!validateEmail(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    addEmailTag(email);
+    emailInput.value = '';
+    updateHiddenInput();
+  }
+  
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+  
+  function addEmailTag(email) {
+    const tagsContainer = document.getElementById('emailTags');
+    const tag = document.createElement('div');
+    tag.className = 'email-tag';
+    tag.innerHTML = `
+      ${email}
+      <button class="email-tag-remove" onclick="removeEmailTag(this)">×</button>
+    `;
+    tagsContainer.appendChild(tag);
+  }
+  
+  function removeEmailTag(button) {
+    button.parentElement.remove();
+    updateHiddenInput();
+  }
+  
+  function updateHiddenInput() {
+    const tags = document.querySelectorAll('.email-tag');
+    const emails = Array.from(tags).map(tag => 
+      tag.textContent.replace('×', '').trim()
+    );
+    document.getElementById('teamMembers').value = emails.join(',');
+  }
+  
+  // Allow adding emails with Enter key
+  document.getElementById('teamMemberEmail').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addEmail();
+    }
+  });
+  
+  // Update form submission handler
+  document.getElementById('projectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const projectData = {
+      // ... other fields ...
+      teamMembers: document.getElementById('teamMembers').value.split(',').filter(Boolean),
+      // ... rest of your submission logic ...
+    };
+  });
+  // this is for the invitation with email and multiple members 
+function openInviteDialog() {
+    document.getElementById('inviteDialog').style.display = 'block';
+  }
+  
+  function closeInviteDialog() {
+    document.getElementById('inviteDialog').style.display = 'none';
+  }
+  
+  function addBulkEmails() {
+    const textarea = document.getElementById('bulkEmails');
+    const emails = textarea.value
+      .split(/[\n,]/) // Split by new lines or commas
+      .map(email => email.trim())
+      .filter(email => email.length > 0);
+    
+    let hasInvalid = false;
+    
+    emails.forEach(email => {
+      if (validateEmail(email)) {
+        addEmailTag(email);
+      } else {
+        hasInvalid = true;
+      }
+    });
+    
+    if (hasInvalid) {
+      alert('Some email addresses were invalid and not added');
+    }
+    
+    updateHiddenInput();
+    closeInviteDialog();
+    textarea.value = '';
+  }
+  
+  // Update the existing validateEmail function to make it reusable
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+  
+  // Close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById('inviteDialog');
+    if (event.target == modal) {
+      closeInviteDialog();
+    }
+  }
+  </script>
+</body>
+</html>

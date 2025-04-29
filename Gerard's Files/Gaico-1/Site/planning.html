@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Phase - GAICO</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <script>
+        // Authentication check
+        const token = localStorage.getItem("access_token");
+        if (!token) window.location.href = "login.html";
+      </script>
+    
+      <header class="navbar">
+        <a href="index.html" class="logo-container">
+          <img src="assets/logo.png" alt="Logo" class="logo-img" />
+        </a>
+    
+        <div class="top-navbar">
+          <div class="top-left">
+            <input type="text" placeholder="Search..." class="search-bar" />
+          </div>
+          <div class="top-right" id="auth-control"></div>
+        </div>
+    
+        <div class="bottom-navbar">
+          <nav class="nav-links">
+            <a href="projectlisting.html">
+              <img src="assets/projects.png" alt="List of Projects Icon" class="icon" />
+              Home
+            </a>
+            <a href="dashboard.html">
+              <img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+              Dashboard
+            </a>
+            <a href="timeline.html">
+              <img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+              Timeline
+            </a>
+            <a href="teams.html">
+              <img src="assets/teams.png" alt="Teams Icon" class="icon" />
+              Teams
+            </a>
+            <a href="projects.html">
+              <img src="assets/projects.png" alt="Projects Icon" class="icon" />
+              New project
+            </a>
+          </nav>
+        </div>
+      </header>
+      
+      
+
+    <div class="planning-content">
+        <h2>Project Planning</h2>
+
+        <div class="activities-container">
+            <div class="section-header" onclick="toggleSection('activities')">
+                <h3>Project Activities</h3>
+                <span class="toggle-icon" id="activities-toggle-icon">+</span>
+            </div>
+
+            <div class="section-content" id="activities-section">
+                <button class="btn btn-primary btn-add-activity" onclick="showActivityForm()">
+                    + Add New Activity
+                </button>
+
+                <div class="form-container activity-form" id="activityForm" style="display:none;">
+                   <form onsubmit="event.preventDefault(); saveActivity();">
+                     <fieldset>
+                        <legend id="activity-form-legend">Add New Activity</legend>
+                        <input type="hidden" id="editActivityId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityName">Activity Name *</label>
+                                <input type="text" id="activityName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="activityDuration">Duration (days) *</label>
+                                <input type="number" id="activityDuration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="activityCost">Estimated Cost ($)</label>
+                                <input type="number" id="activityCost" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="activityBudget">Budget ($)</label>
+                                <input type="number" id="activityBudget" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                        <div id="activity-error" class="error-message"></div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideActivityForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="saveActivityBtn">Save Activity</button>
+                        </div>
+                     </fieldset>
+                   </form>
+                </div>
+
+                <h4>Existing Activities:</h4>
+                <div class="activities-list" id="activitiesList">
+                    <p>Loading activities...</p>
+                    </div>
+            </div>
+        </div>
+
+        <div class="work-packages-container" id="workPackagesSection" style="display:none;">
+             <div class="section-header"> <h3 id="selectedActivityTitle">Work Packages</h3>
+            </div>
+
+             <div class="section-content">
+                <div id="workpackage-placeholder" style="display: none; margin-bottom: 15px; color: #666;">
+                    Select an activity above to view or add its work packages.
+                </div>
+
+                <button class="btn btn-primary btn-add-workpackage" onclick="showWorkPackageForm()">
+                    + Add Work Package
+                </button>
+
+                <div class="form-container workpackage-form" id="workPackageForm" style="display:none;">
+                    <form onsubmit="event.preventDefault(); saveWorkPackage();">
+                      <fieldset>
+                        <legend id="wp-form-legend">Add New Work Package</legend>
+                        <input type="hidden" id="editWorkPackageId">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="workPackageName">Work Package Name *</label>
+                                <input type="text" id="workPackageName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="workPackageDuration">Duration (days) *</label>
+                                <input type="number" id="workPackageDuration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="workPackageCost">Estimated Cost ($)</label>
+                                <input type="number" id="workPackageCost" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="workPackageBudget">Budget ($)</label>
+                                <input type="number" id="workPackageBudget" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+                         <div id="wp-error" class="error-message"></div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideWorkPackageForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="saveWorkPackageBtn">Save Package</button>
+                        </div>
+                      </fieldset>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table class="workpackage-table">
+                        <thead>
+                            <tr>
+                                <th>Work Package</th>
+                                <th>Duration</th>
+                                <th>Est. Cost</th>
+                                <th>Budget</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workPackagesList">
+                           <tr><td colspan="5" id="wp-list-placeholder">Select an activity or add work packages.</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td><strong>Totals:</strong></td>
+                                <td id="totalDuration">0 days</td>
+                                <td id="totalCost">$0.00</td>
+                                <td id="totalBudget">$0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const API_BASE_URL = '/api'; // Adjust if your API is hosted elsewhere
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+
+        // --- DOM Elements ---
+        const activitiesSection = document.getElementById('activities-section');
+        const activitiesToggleIcon = document.getElementById('activities-toggle-icon');
+        const activityForm = document.getElementById('activityForm');
+        const activityFormLegend = document.getElementById('activity-form-legend');
+        const saveActivityBtn = document.getElementById('saveActivityBtn');
+        const editActivityIdInput = document.getElementById('editActivityId');
+        const activityNameInput = document.getElementById('activityName');
+        const activityDurationInput = document.getElementById('activityDuration');
+        const activityCostInput = document.getElementById('activityCost');
+        const activityBudgetInput = document.getElementById('activityBudget');
+        const activityError = document.getElementById('activity-error');
+        const activitiesListContainer = document.getElementById('activitiesList');
+
+        const workPackagesSection = document.getElementById('workPackagesSection');
+        const selectedActivityTitle = document.getElementById('selectedActivityTitle');
+        const workPackageForm = document.getElementById('workPackageForm');
+        const wpFormLegend = document.getElementById('wp-form-legend');
+        const saveWorkPackageBtn = document.getElementById('saveWorkPackageBtn');
+        const editWorkPackageIdInput = document.getElementById('editWorkPackageId');
+        const workPackageNameInput = document.getElementById('workPackageName');
+        const workPackageDurationInput = document.getElementById('workPackageDuration');
+        const workPackageCostInput = document.getElementById('workPackageCost');
+        const workPackageBudgetInput = document.getElementById('workPackageBudget');
+        const wpError = document.getElementById('wp-error');
+        const workPackagesListContainer = document.getElementById('workPackagesList');
+        const wpListPlaceholder = document.getElementById('wp-list-placeholder');
+        const workpackagePlaceholder = document.getElementById('workpackage-placeholder');
+
+
+        const totalDurationEl = document.getElementById('totalDuration');
+        const totalCostEl = document.getElementById('totalCost');
+        const totalBudgetEl = document.getElementById('totalBudget');
+
+
+        // --- Global State ---
+        let currentActivityId = null;
+        let activities = []; // Array of activity objects {id, name, duration, cost, budget}
+        let workPackages = {}; // Object where keys are activityId, values are arrays of work packages {id, name, ...}
+
+        // --- Utility Functions ---
+        function formatCurrency(amount) {
+            return `$${(amount || 0).toFixed(2)}`;
+        }
+
+        function showApiError(element, error) {
+            console.error('API Error:', error);
+            element.textContent = `Error: ${error.message || 'Request failed. Check console.'}`;
+            element.style.display = 'block';
+        }
+
+        function clearApiError(element) {
+            element.textContent = '';
+            element.style.display = 'none';
+        }
+
+        // --- API Interaction ---
+        async function apiRequest(endpoint, method = 'GET', body = null) {
+            const headers = {
+                'Authorization': `Bearer ${token}`
+            };
+            const options = { method, headers };
+
+            if (body) {
+                options.headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+                 // Handle cases where backend might not return JSON on success (e.g., 204 No Content for DELETE)
+                 if (response.status === 204) {
+                    return null; // Or return { success: true } or similar if needed downstream
+                 }
+                return await response.json();
+            } catch (error) {
+                console.error(`API request failed: ${method} ${endpoint}`, error);
+                throw error; // Re-throw to be caught by calling function
+            }
+        }
+
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!projectId) {
+                alert('No project ID specified in URL (?id=...). Redirecting to projects page.');
+                // window.location.href = 'projects.html'; // Uncomment in production
+                console.error("Missing projectId");
+                activitiesListContainer.innerHTML = '<p>Error: No Project ID provided.</p>';
+                 workpackagePlaceholder.textContent = "Cannot load work packages without a Project ID.";
+                 workpackagePlaceholder.style.display = 'block';
+                 workPackagesSection.style.display = 'block'; // Show the section to display the error
+                return;
+            }
+            console.log(`Initializing for Project ID: ${projectId}`);
+            loadPlanningData();
+            toggleSection('activities', true); // Open activities section by default
+             workpackagePlaceholder.style.display = 'block'; // Show placeholder initially
+             wpListPlaceholder.textContent = "Select an activity to see its work packages."; // Initial table message
+        });
+
+        // --- Load Initial Data ---
+        async function loadPlanningData() {
+            try {
+                // In a real app, you might have a single endpoint fetching all planning data
+                // Or fetch activities first, then potentially WPs for the first/last selected activity
+                activities = await apiRequest(`/projects/${projectId}/activities`);
+                // Assuming workPackages are nested or fetched separately as needed.
+                // For demo, let's fetch all WPs if the API supports it, otherwise fetch on demand.
+                // Let's assume they come nested for simplicity here OR we fetch them upon activity selection.
+                // Simulating nested structure load for now:
+                const planningData = await apiRequest(`/projects/${projectId}/planning`); // Assume this endpoint exists
+                activities = planningData.activities || [];
+                workPackages = planningData.workPackages || {}; // Structure: { activityId1: [wp1, wp2], activityId2: [...] }
+
+
+                renderActivities();
+                // Optionally select the first activity or restore last selection
+                 if (activities.length > 0) {
+                   // selectActivity(activities[0].id); // Uncomment to auto-select first activity
+                 } else {
+                    activitiesListContainer.innerHTML = '<p>No activities found for this project yet. Add one above!</p>';
+                     workpackagePlaceholder.textContent = "Add an activity first.";
+                 }
+
+
+            } catch (error) {
+                console.error('Error loading planning data:', error);
+                 activitiesListContainer.innerHTML = `<p class="error-message">Error loading activities: ${error.message}</p>`;
+                workPackagesSection.style.display = 'block'; // Show the section to display the error
+                workpackagePlaceholder.textContent = `Error loading data: ${error.message}`;
+                workpackagePlaceholder.style.display = 'block';
+            }
+        }
+
+        // --- Section Toggling ---
+        function toggleSection(sectionId, forceOpen = false) {
+            const section = document.getElementById(`${sectionId}-section`);
+            const icon = document.getElementById(`${sectionId}-toggle-icon`);
+            if (!section || !icon) return;
+
+            const isOpen = section.classList.contains('active');
+
+             if (forceOpen) {
+                section.classList.add('active');
+                icon.textContent = '−';
+             } else {
+                section.classList.toggle('active');
+                icon.textContent = section.classList.contains('active') ? '−' : '+';
+             }
+        }
+
+        // --- Activity Functions ---
+        function showActivityForm(activityId = null) {
+            clearApiError(activityError);
+            if (activityId) {
+                const activity = activities.find(a => a.id === activityId);
+                if (!activity) return;
+                activityFormLegend.textContent = 'Edit Activity';
+                saveActivityBtn.textContent = 'Update Activity';
+                editActivityIdInput.value = activity.id;
+                activityNameInput.value = activity.name;
+                activityDurationInput.value = activity.duration;
+                activityCostInput.value = activity.cost;
+                activityBudgetInput.value = activity.budget;
+            } else {
+                activityFormLegend.textContent = 'Add New Activity';
+                saveActivityBtn.textContent = 'Save Activity';
+                resetActivityForm();
+            }
+            activityForm.style.display = 'block';
+            activityNameInput.focus();
+        }
+
+        function hideActivityForm() {
+            activityForm.style.display = 'none';
+            clearApiError(activityError);
+            resetActivityForm(); // Reset fields when hiding
+        }
+
+        function resetActivityForm() {
+            editActivityIdInput.value = '';
+            activityNameInput.value = '';
+            activityDurationInput.value = '';
+            activityCostInput.value = '0';
+            activityBudgetInput.value = '0';
+            activityFormLegend.textContent = 'Add New Activity';
+            saveActivityBtn.textContent = 'Save Activity';
+        }
+
+        async function saveActivity() {
+            clearApiError(activityError);
+            const name = activityNameInput.value.trim();
+            const duration = parseInt(activityDurationInput.value);
+            const cost = parseFloat(activityCostInput.value) || 0;
+            const budget = parseFloat(activityBudgetInput.value) || 0;
+            const editingId = editActivityIdInput.value;
+
+            if (!name || !duration || duration <= 0) {
+                 showApiError(activityError, { message: 'Please provide a valid Activity Name and a positive Duration (days).' });
+                return;
+            }
+
+            const activityData = { name, duration, cost, budget };
+            let savedActivity;
+            saveActivityBtn.disabled = true;
+            saveActivityBtn.textContent = editingId ? 'Updating...' : 'Saving...';
+
+            try {
+                if (editingId) {
+                    // Update existing activity
+                    savedActivity = await apiRequest(`/projects/${projectId}/activities/${editingId}`, 'PUT', activityData);
+                    // Update in local state
+                    const index = activities.findIndex(a => a.id === editingId);
+                    if (index > -1) activities[index] = { ...activities[index], ...savedActivity }; // Use spread to keep original ID if API doesn't return it on PUT
+                    if(currentActivityId === editingId) {
+                       selectedActivityTitle.textContent = `Work Packages for: ${savedActivity.name}`; // Update title if selected
+                    }
+
+                } else {
+                    // Create new activity
+                    savedActivity = await apiRequest(`/projects/${projectId}/activities`, 'POST', activityData);
+                    activities.push(savedActivity);
+                    if (!workPackages[savedActivity.id]) {
+                       workPackages[savedActivity.id] = []; // Initialize WP array for new activity
+                    }
+                }
+                renderActivities();
+                hideActivityForm();
+            } catch (error) {
+                 showApiError(activityError, error);
+            } finally {
+                 saveActivityBtn.disabled = false;
+                 // Text reset in hideActivityForm or showActivityForm
+            }
+        }
+
+         async function deleteActivity(activityId) {
+            if (!confirm(`Are you sure you want to delete the activity: "${activities.find(a => a.id === activityId)?.name || 'this activity'}"?\n\nThis will also delete all associated work packages.`)) {
+                return;
+            }
+
+            try {
+                await apiRequest(`/projects/${projectId}/activities/${activityId}`, 'DELETE');
+                activities = activities.filter(a => a.id !== activityId);
+                delete workPackages[activityId]; // Remove associated work packages from local state
+
+                if (currentActivityId === activityId) {
+                    currentActivityId = null;
+                    workPackagesSection.style.display = 'none'; // Hide WP section if deleted activity was selected
+                    selectedActivityTitle.textContent = 'Work Packages';
+                     workpackagePlaceholder.style.display = 'block';
+                }
+                renderActivities(); // Re-render the activity list
+                if (activities.length === 0) {
+                     activitiesListContainer.innerHTML = '<p>No activities found for this project yet. Add one above!</p>';
+                     workpackagePlaceholder.textContent = "Add an activity first.";
+                }
+
+            } catch (error) {
+                console.error(`Error deleting activity ${activityId}:`, error);
+                alert(`Failed to delete activity: ${error.message}`); // Simple alert for delete failure
+            }
+        }
+
+
+        function renderActivities() {
+             activitiesListContainer.innerHTML = ''; // Clear previous list
+             if (activities.length === 0 && !document.querySelector('#activitiesList p.error-message')) { // Avoid overwriting error message
+                activitiesListContainer.innerHTML = '<p>No activities defined yet. Click "+ Add New Activity".</p>';
+                return;
+            }
+
+            activities.forEach(activity => {
+                const activityEl = document.createElement('div');
+                activityEl.className = `activity-item ${currentActivityId === activity.id ? 'active' : ''}`;
+                activityEl.dataset.activityId = activity.id; // Store id for easier selection
+                activityEl.innerHTML = `
+                    <div class="activity-header" onclick="selectActivity('${activity.id}')"> <h4>${activity.name}</h4>
+                        <div class="activity-summary">
+                           Duration: ${activity.duration} days | Est. Cost: ${formatCurrency(activity.cost)} | Budget: ${formatCurrency(activity.budget)}
+                        </div>
+                    </div>
+                     <div class="activity-actions">
+                         <button class="action-btn edit" title="Edit Activity" onclick="event.stopPropagation(); showActivityForm('${activity.id}')">✏️</button>
+                         <button class="action-btn delete" title="Delete Activity" onclick="event.stopPropagation(); deleteActivity('${activity.id}')">🗑️</button>
+                     </div>
+                `;
+                // Removed the redundant event listener on the whole element, using onclick in header now.
+                activitiesListContainer.appendChild(activityEl);
+            });
+        }
+
+        function selectActivity(id) {
+             if (currentActivityId === id) return; // Don't re-select if already selected
+
+            currentActivityId = id;
+            const selectedActivity = activities.find(a => a.id === id);
+             if (!selectedActivity) return; // Should not happen if UI is correct
+
+            // Update visual selection
+            document.querySelectorAll('.activity-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.activityId === id);
+            });
+
+             selectedActivityTitle.textContent = `Work Packages for: ${selectedActivity.name}`;
+            workPackagesSection.style.display = 'block';
+             workpackagePlaceholder.style.display = 'none'; // Hide placeholder
+             hideWorkPackageForm(); // Hide form if it was open for another activity
+             renderWorkPackages(); // Load and display WPs for this activity
+        }
+
+        // --- Work Package Functions ---
+         function showWorkPackageForm(wpId = null) {
+             clearApiError(wpError);
+            if (!currentActivityId) {
+                alert('Internal error: No activity selected.'); // Should not happen with current flow
+                return;
+            }
+
+            if (wpId) {
+                 const wp = workPackages[currentActivityId]?.find(w => w.id === wpId);
+                 if (!wp) return;
+                 wpFormLegend.textContent = 'Edit Work Package';
+                 saveWorkPackageBtn.textContent = 'Update Package';
+                 editWorkPackageIdInput.value = wp.id;
+                 workPackageNameInput.value = wp.name;
+                 workPackageDurationInput.value = wp.duration;
+                 workPackageCostInput.value = wp.cost;
+                 workPackageBudgetInput.value = wp.budget;
+            } else {
+                 wpFormLegend.textContent = 'Add New Work Package';
+                 saveWorkPackageBtn.textContent = 'Save Package';
+                 resetWorkPackageForm();
+            }
+             workPackageForm.style.display = 'block';
+             workPackageNameInput.focus();
+        }
+
+        function hideWorkPackageForm() {
+            workPackageForm.style.display = 'none';
+            clearApiError(wpError);
+            resetWorkPackageForm();
+        }
+
+        function resetWorkPackageForm() {
+             editWorkPackageIdInput.value = '';
+             workPackageNameInput.value = '';
+             workPackageDurationInput.value = '';
+             workPackageCostInput.value = '0';
+             workPackageBudgetInput.value = '0';
+             wpFormLegend.textContent = 'Add New Work Package';
+             saveWorkPackageBtn.textContent = 'Save Package';
+        }
+
+       async function saveWorkPackage() {
+            clearApiError(wpError);
+            if (!currentActivityId) {
+                showApiError(wpError, { message: "Cannot save: No activity selected." });
+                return;
+            }
+
+            const name = workPackageNameInput.value.trim();
+            const duration = parseInt(workPackageDurationInput.value);
+            const cost = parseFloat(workPackageCostInput.value) || 0;
+            const budget = parseFloat(workPackageBudgetInput.value) || 0;
+            const editingId = editWorkPackageIdInput.value;
+
+            if (!name || !duration || duration <= 0) {
+                showApiError(wpError, { message: 'Please provide a valid Work Package Name and a positive Duration (days).' });
+                return;
+            }
+
+            const wpData = { name, duration, cost, budget };
+            let savedPackage;
+            saveWorkPackageBtn.disabled = true;
+            saveWorkPackageBtn.textContent = editingId ? 'Updating...' : 'Saving...';
+
+
+            try {
+                 const endpoint = `/projects/${projectId}/activities/${currentActivityId}/work-packages`;
+                 if (editingId) {
+                    // Update existing work package
+                    savedPackage = await apiRequest(`${endpoint}/${editingId}`, 'PUT', wpData);
+                    // Update local state
+                    const wpList = workPackages[currentActivityId] || [];
+                    const index = wpList.findIndex(w => w.id === editingId);
+                    if (index > -1) wpList[index] = { ...wpList[index], ...savedPackage };
+
+                 } else {
+                    // Create new work package
+                    savedPackage = await apiRequest(endpoint, 'POST', wpData);
+                    if (!workPackages[currentActivityId]) {
+                        workPackages[currentActivityId] = []; // Ensure array exists
+                    }
+                    workPackages[currentActivityId].push(savedPackage);
+                 }
+                 renderWorkPackages();
+                 hideWorkPackageForm();
+             } catch(error) {
+                showApiError(wpError, error);
+             } finally {
+                saveWorkPackageBtn.disabled = false;
+                 // Text reset in hideWorkPackageForm or showWorkPackageForm
+             }
+        }
+
+        async function deleteWorkPackage(wpId) {
+             if (!currentActivityId) return;
+             const wpList = workPackages[currentActivityId] || [];
+             const wp = wpList.find(w => w.id === wpId);
+
+            if (!wp) return; // Should not happen
+
+            if (!confirm(`Are you sure you want to delete the work package: "${wp.name}"?`)) {
+                return;
+            }
+
+            try {
+                await apiRequest(`/projects/${projectId}/activities/${currentActivityId}/work-packages/${wpId}`, 'DELETE');
+                // Remove from local state
+                workPackages[currentActivityId] = wpList.filter(w => w.id !== wpId);
+                renderWorkPackages(); // Re-render the list and totals
+            } catch (error) {
+                console.error(`Error deleting work package ${wpId}:`, error);
+                alert(`Failed to delete work package: ${error.message}`);
+            }
+        }
+
+
+        function renderWorkPackages() {
+            if (!currentActivityId) {
+                 workPackagesListContainer.innerHTML = `<tr><td colspan="5">${wpListPlaceholder.textContent || 'Select an activity.'}</td></tr>`; // Show placeholder message
+                 calculateTotals(); // Calculate (zero) totals
+                return;
+            }
+
+             const currentWPs = workPackages[currentActivityId] || [];
+             workPackagesListContainer.innerHTML = ''; // Clear previous list
+
+            if (currentWPs.length === 0) {
+                 workPackagesListContainer.innerHTML = `<tr><td colspan="5">No work packages defined for this activity yet.</td></tr>`;
+                 wpListPlaceholder.style.display = "none"; // Hide main placeholder if table is shown
+            } else {
+                 wpListPlaceholder.style.display = "none"; // Hide main placeholder if table is shown
+                 currentWPs.forEach(wp => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${wp.name}</td>
+                        <td>${wp.duration} days</td>
+                        <td>${formatCurrency(wp.cost)}</td>
+                        <td>${formatCurrency(wp.budget)}</td>
+                        <td class="actions-cell">
+                            <button class="action-btn edit" title="Edit Package" onclick="showWorkPackageForm('${wp.id}')">✏️</button>
+                            <button class="action-btn delete" title="Delete Package" onclick="deleteWorkPackage('${wp.id}')">🗑️</button>
+                        </td>
+                    `;
+                    workPackagesListContainer.appendChild(row);
+                 });
+            }
+            calculateTotals(); // Update totals whenever the list is rendered
+        }
+
+        function calculateTotals() {
+             const packages = workPackages[currentActivityId] || [];
+             const totalDuration = packages.reduce((sum, wp) => sum + (wp.duration || 0), 0);
+             const totalCost = packages.reduce((sum, wp) => sum + (wp.cost || 0), 0);
+             const totalBudget = packages.reduce((sum, wp) => sum + (wp.budget || 0), 0);
+
+             totalDurationEl.textContent = `${totalDuration} days`;
+             totalCostEl.textContent = formatCurrency(totalCost);
+             totalBudgetEl.textContent = formatCurrency(totalBudget);
+        }
+
+    </script>
+</body>
+</html>

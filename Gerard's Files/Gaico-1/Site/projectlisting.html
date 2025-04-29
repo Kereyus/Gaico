@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GAICO Projects</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* Add these styles to your existing CSS */
+
+html, body {
+
+height: 100%;
+
+margin: 0;
+
+padding: 0;
+
+font-family: 'Kameron', serif;
+
+}
+
+
+body {
+
+display: flex;
+
+flex-direction: column;
+
+background-color:#666
+
+}
+
+
+.navbar {
+
+flex-shrink: 0;
+
+}
+
+
+.projects-container {
+
+flex: 1;
+
+display: flex;
+
+flex-direction: column;
+
+padding: 20px;
+
+box-sizing: border-box;
+
+width: 100%;
+
+overflow: hidden;
+
+}
+
+
+.projects-header {
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+margin-bottom: 20px;
+
+flex-wrap: wrap;
+
+gap: 15px;
+
+}
+
+
+.projects-table-container {
+
+flex: 1;
+
+overflow: auto;
+
+border: 1px solid #e0e0e0;
+
+border-radius: 8px;
+
+background: #666;
+
+box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+}
+
+
+.projects-table {
+
+width: 100%;
+
+min-width: 800px;
+
+border-collapse: collapse;
+
+}
+
+
+.projects-table th {
+
+background-color: #f8f9fa;
+
+padding: 12px 15px;
+
+text-align: left;
+
+font-weight: 700;
+
+position: sticky;
+
+top: 0;
+
+z-index: 10;
+
+}
+
+
+.projects-table td {
+
+padding: 12px 15px;
+
+border-bottom: 1px solid #e0e0e0;
+
+}
+
+
+.project-link {
+
+color: white;
+
+text-decoration: none;
+
+font-weight: 500;
+
+}
+
+
+.project-link:hover {
+
+text-decoration: underline;
+
+
+}
+
+
+.btn-create-project {
+
+background-color: #4CAF50;
+
+color: white;
+
+padding: 10px 20px;
+
+border-radius: 6px;
+
+text-decoration: none;
+
+font-weight: 500;
+
+display: inline-flex;
+
+align-items: center;
+
+gap: 8px;
+
+white-space: nowrap;
+
+}
+
+
+.btn-create-project:hover {
+
+background-color: #45a049;
+
+}
+
+
+/* Status badges */
+
+.status-badge {
+
+padding: 4px 10px;
+
+border-radius: 12px;
+
+font-size: 12px;
+
+font-weight: 500;
+
+display: inline-block;
+
+min-width: 80px;
+
+text-align: center;
+
+}
+
+
+.status-not-started {
+
+background-color: #f0f0f0;
+
+color: #666;
+
+}
+
+
+.status-in-progress {
+
+background-color: #e6f7ff;
+
+color: #1890ff;
+
+}
+
+
+.status-on-hold {
+
+background-color: #fff7e6;
+
+color: #fa8c16;
+
+}
+
+
+.status-completed {
+
+background-color: #f6ffed;
+
+color: #52c41a;
+
+}
+
+
+.status-cancelled {
+
+background-color: #fff1f0;
+
+color: #f5222d;
+
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+
+.projects-header {
+
+flex-direction: column;
+
+align-items: flex-start;
+
+}
+
+
+.projects-table th,
+
+.projects-table td {
+
+padding: 8px 12px;
+
+font-size: 14px;
+
+}
+
+
+.btn-create-project {
+
+width: 100%;
+
+justify-content: center;
+
+}
+
+}
+
+
+@media (max-width: 480px) {
+
+.projects-container {
+
+padding: 15px;
+
+}
+
+
+.projects-table th,
+
+.projects-table td {
+
+padding: 6px 8px;
+
+font-size: 13px;
+
+}
+
+
+.status-badge {
+
+min-width: 70px;
+
+padding: 3px 6px;
+
+}
+
+}
+
+.projects-table tr:hover {
+
+background: transparent !important; /* this is for removing the hovering on the content of the table */
+
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+
+<a href="index.html" class="logo-container">
+
+<img src="assets/logo.png" alt="Logo" class="logo-img" />
+
+</a>
+
+<div class="top-navbar">
+
+<div class="top-left">
+
+<input type="text" placeholder="Search..." class="search-bar" />
+
+</div>
+
+<div class="top-right" id="auth-control"></div>
+
+</div>
+
+<div class="bottom-navbar">
+
+<nav class="nav-links">
+
+<a href="projectlisting.html">
+
+<img src="assets/projects.png" alt="List of Projects Icon" class="icon" />
+
+Home
+
+</a>
+
+<a href="dashboard.html">
+
+<img src="assets/dashboard.png" alt="Dashboard Icon" class="icon" />
+
+Dashboard
+
+</a>
+
+<a href="timeline.html">
+
+<img src="assets/timeline.png" alt="Timeline Icon" class="icon" />
+
+Timeline
+
+</a>
+
+<a href="teams.html">
+
+<img src="assets/teams.png" alt="Teams Icon" class="icon" />
+
+Teams
+
+</a>
+
+<a href="projects.html">
+
+<img src="assets/projects.png" alt="Projects Icon" class="icon" />
+
+New project
+
+</a>
+
+</nav>
+
+</div>
+
+</header>
+
+
+
+<div class="projects-header">
+
+
+<h1>Projects</h1>
+
+
+<a href="projects.html" class="btn-create-project">
+
+
++ Create New Project
+
+
+</a>
+
+
+</div>
+
+
+
+
+<div class="projects-table-container">
+
+
+<table class="projects-table">
+
+
+<thead>
+
+
+<tr>
+
+
+<th>Name</th>
+
+
+<th>Project Manager</th>
+
+
+<th>Description</th>
+
+
+<th>Start Date</th>
+
+
+<th>End Date</th>
+
+
+<th>Status</th>
+
+
+<th>Created On</th>
+
+
+</tr>
+
+
+</thead>
+
+
+<tbody id="projectsList">
+
+
+<!-- Projects will be loaded here -->
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+</main>
+
+<!-- original script
+
+<script>
+
+// projectlisting.js integrated logic
+
+const API_BASE_URL = "http://localhost:8081/api/projects/getProjects";
+
+let projectsListContainer; // Declare variable, will be assigned when DOM is ready
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+projectsListContainer = document.getElementById('projectsList'); // Get the container after DOM is loaded
+
+
+
+// Initial loading state
+
+if (projectsListContainer) {
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading projects...</td></tr>';
+
+}
+
+// Check if user is logged in
+
+const token = localStorage.getItem("access_token");
+
+if (!token) {
+
+console.warn("No access token found, redirecting to login.");
+
+window.location.href = "login.html";
+
+return; // Stop execution if not logged in
+
+}
+
+// Fetch and render projects
+
+fetchProjects();
+
+// Adjust table container height on resize
+
+window.addEventListener('resize', adjustTableHeight);
+
+adjustTableHeight(); // Call initially to set height on page load
+
+});
+/**
+
+* Fetches project data from the backend API.
+
+*/
+
+async function fetchProjects() {
+
+const token = localStorage.getItem("access_token"); // Get token again just in case
+
+
+
+if (!token) {
+
+console.error("Token missing during fetchProjects call.");
+
+// This case should ideally be caught by the DOMContentLoaded check, but good to be safe.
+
+if (projectsListContainer) {
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Authentication failed. Please log in.</td></tr>';
+
+}
+
+alert("Authentication failed. Please log in again.");
+
+window.location.href = "login.html";
+
+return;
+
+}
+try {
+
+// Use the API_BASE_URL directly as per your provided JS
+
+const response = await fetch(`${API_BASE_URL}`, {
+
+method: 'GET',
+
+headers: {
+
+'Authorization': `Bearer ${token}`,
+
+'Content-Type': 'application/json' // Often good practice to include
+},
+});
+
+if (!response.ok) {
+
+// Attempt to read error message from body
+
+let errorDetail = `Status: ${response.status}`;
+
+try {
+
+const errorData = await response.json();
+
+errorDetail = errorData.message || JSON.stringify(errorData);
+
+console.error('Failed to fetch projects (API Error):', response.status, errorData);
+
+} catch (e) {
+
+// If JSON parsing fails, just use the status text
+
+errorDetail = response.statusText;
+
+console.error('Failed to fetch projects (Non-JSON Error):', response.status, response.statusText);
+
+}
+
+
+
+if (projectsListContainer) {
+
+projectsListContainer.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Failed to load projects: ${errorDetail}</td></tr>`;
+
+}
+
+alert(`Failed to load projects: ${errorDetail}`);
+
+// Consider handling specific statuses like 401 Unauthorized
+
+if (response.status === 401) {
+
+console.warn("Token expired or invalid, redirecting to login.");
+
+localStorage.removeItem("access_token"); // Clear invalid token
+
+window.location.href = "login.html";
+
+}
+
+return; // Stop execution after handling error
+
+}
+
+
+
+const projects = await response.json();
+
+console.log("Successfully fetched projects:", projects); // Log fetched data
+
+renderProjects(projects); // Render the fetched data
+
+
+
+} catch (error) {
+
+console.error('Error fetching projects:', error);
+
+if (projectsListContainer) {
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error connecting to the server. Please try again later.</td></tr>';
+
+}
+
+alert('Failed to load projects. Please check your network connection and try again later.');
+
+}
+
+}
+
+
+
+/**
+
+* Renders the list of projects into the table body.
+
+* @param {Array<Object>} projects - An array of project objects.
+
+*/
+
+function renderProjects(projects) {
+
+if (!projectsListContainer) {
+
+console.error("Projects list container not found in the DOM during render.");
+
+return;
+
+}
+
+
+
+projectsListContainer.innerHTML = ''; // Clear existing content
+
+
+
+if (!projects || projects.length === 0) {
+
+// Display a message if no projects are found
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center;">No projects found.</td></tr>';
+
+return;
+
+}
+
+
+
+// Render projects
+
+projects.forEach(project => {
+
+const row = document.createElement("tr");
+
+
+
+// Use nullish coalescing (||) to display 'N/A' if data is missing
+
+// Ensure property names match your API response (project.projectManager, etc.)
+
+row.innerHTML = `
+
+<td>
+
+<a href="projectmanagement.html?id=${project.id}" class="project-link">
+
+${project.name || 'N/A'}
+
+</a>
+
+</td>
+
+<td>${project.projectManager || 'N/A'}</td>
+
+<td>${project.controller || 'N/A'}</td>
+
+<td>${formatDate(project.startDate) || 'N/A'}</td>
+
+<td>${formatDate(project.endDate) || 'N/A'}</td>
+
+<td><span class="status-badge ${getStatusClass(project.status)}">${project.status || 'N/A'}</span></td>
+
+<td>${formatDate(project.createdOn) || 'N/A'}</td>
+
+`;
+
+projectsListContainer.appendChild(row);
+
+});
+
+}
+
+
+
+/**
+
+* Formats a date string into a human-readable format.
+
+* @param {string} dateString - The date string to format.
+
+* @returns {string} The formatted date string or 'N/A'.
+
+*/
+
+function formatDate(dateString) {
+
+if (!dateString) return 'N/A'; // Handle null, undefined, or empty date strings
+
+try {
+
+const date = new Date(dateString);
+
+// Check if the date is valid (e.g., handles "invalid date" inputs)
+
+if (isNaN(date.getTime())) {
+
+console.warn("Invalid date string provided:", dateString);
+
+return dateString; // Return original string if invalid
+
+}
+
+const options = { year: 'numeric', month: 'short', day: 'numeric' };
+
+return date.toLocaleDateString(undefined, options);
+
+} catch (e) {
+
+console.error("Error formatting date:", e);
+
+return dateString; // Return original string on error
+
+}
+
+}
+
+
+
+/**
+
+* Gets the appropriate CSS class name based on project status.
+
+* @param {string} status - The project status string.
+
+* @returns {string} The CSS class name prefix for the status badge.
+
+*/
+
+function getStatusClass(status) {
+
+// Handle null, undefined, or empty status
+
+if (!status) return 'status-default';
+
+
+
+// Map known statuses to CSS class suffixes
+
+const statusMap = {
+
+'Not Started': 'not-started',
+
+'In Progress': 'in-progress',
+
+'On Hold': 'on-hold',
+
+'Completed': 'completed',
+
+'Cancelled': 'cancelled',
+
+// Include variations if your API might return them with underscores
+
+'not_started': 'not-started',
+
+'in_progress': 'in-progress',
+
+'on_hold': 'on-hold',
+
+'completed': 'completed',
+
+'cancelled': 'cancelled',
+
+};
+
+
+
+// Get the corresponding class suffix from the map, default to 'default'
+
+const statusClassSuffix = statusMap[status] || 'default';
+
+
+
+return `status-${statusClassSuffix}`;
+
+}
+
+
+
+/**
+
+* Adjusts the max-height of the table container based on window size
+
+* and the height of elements above it (navbar, header).
+
+*/
+
+function adjustTableHeight() {
+
+// Use optional chaining (?) for elements that might not exist
+
+const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 0;
+
+const headerHeight = document.querySelector('.projects-header')?.offsetHeight || 0;
+
+const windowHeight = window.innerHeight;
+
+const tableContainer = document.querySelector('.projects-table-container');
+
+
+
+if (tableContainer) {
+
+// Calculate available height. Subtract header, navbar, and some padding/margins (40px)
+
+// Adjust the 40px based on your actual CSS layout
+
+const availableHeight = windowHeight - navbarHeight - headerHeight - 40;
+
+
+
+// Set max-height, ensuring it's not less than a minimum value (e.g., 300px)
+
+tableContainer.style.maxHeight = `${Math.max(availableHeight, 300)}px`;
+
+tableContainer.style.overflowY = 'auto'; // Ensure vertical scrollbar appears if needed
+
+} else {
+
+console.warn(".projects-table-container not found for height adjustment.");
+
+}
+
+}
+
+
+
+// This function was included in your provided JS, keeping it here
+
+// although it's not called by default on this page load.
+
+async function fetchUserProfile() {
+
+const token = localStorage.getItem("access_token");
+
+if (!token) {
+
+console.error("No token found, unable to fetch user profile.");
+
+return null;
+
+}
+
+
+
+try {
+
+const response = await fetch("http://localhost:8081/api/users/profile", {
+
+method: "GET",
+
+headers: {
+
+"Authorization": `Bearer ${token}`,
+
+'Content-Type': 'application/json'
+
+},
+
+});
+
+
+
+if (!response.ok) {
+
+let errorDetail = `Status: ${response.status}`;
+
+try {
+
+const errorData = await response.json();
+
+errorDetail = errorData.message || JSON.stringify(errorData);
+
+console.error('Failed to fetch user profile (API Error):', response.status, errorData);
+
+} catch (e) {
+
+errorDetail = response.statusText;
+
+console.error('Failed to fetch user profile (Non-JSON Error):', response.status, response.statusText);
+
+}
+
+// Consider handling 401 specifically here too
+
+if (response.status === 401) {
+
+console.warn("Token expired or invalid fetching profile, redirecting.");
+
+localStorage.removeItem("access_token");
+
+window.location.href = "login.html";
+
+return null; // Stop execution
+
+}
+
+throw new Error(`Failed to fetch user profile: ${errorDetail}`);
+
+}
+
+
+
+const userProfile = await response.json();
+
+console.log("Logged-in user profile:", userProfile);
+
+// You could potentially use this data here, e.g., display welcome message
+
+return userProfile;
+
+
+
+} catch (error) {
+
+console.error('Error fetching user profile:', error);
+
+alert('Failed to load user profile information.');
+
+return null;
+
+}
+
+}
+
+
+
+// If you needed to display the user's name or perform actions based on their profile
+
+// you would call fetchUserProfile() here or in DOMContentLoaded and handle the result.
+
+// Example:
+
+/*
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+// ... existing code ...
+
+const user = await fetchUserProfile();
+
+if (user && user.name) {
+
+// Update a greeting element, e.g., document.getElementById('userName').textContent = user.name;
+
+}
+
+});
+
+*/
+
+</script>
+
+-->
+
+<script>
+
+// projectlisting.js integrated logic
+
+
+
+// Replace with your actual backend API URL
+
+const API_BASE_URL = "http://localhost:8081/api/projects/getProjects";
+
+let projectsListContainer = null; // Initialize explicitly to null
+document.addEventListener('DOMContentLoaded', () => {
+console.log("DOMContentLoaded fired."); // Log to confirm event runs
+projectsListContainer = document.getElementById('projectsList'); // Attempt to get the element
+
+
+// === Check immediately if the element was found ===
+
+if (!projectsListContainer) {
+
+console.error("FATAL ERROR: Element with ID 'projectsList' not found in the DOM upon loading.");
+
+alert("Required page element not found. Cannot display projects.");
+
+// You might want to display a message on the page itself here too
+
+const tableContainer = document.querySelector('.projects-table-container');
+
+if (tableContainer) {
+
+tableContainer.innerHTML = '<p style="color: red; text-align: center; padding: 20px;">Error: Cannot find the area to display projects. Please check the page structure.</p>';
+
+}
+
+return; // Stop execution if the essential element is missing
+
+} else {
+
+console.log("Element #projectsList found successfully.");
+
+// Set initial loading state - ONLY if container IS found
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading projects...</td></tr>';
+
+}
+
+// ==================================================
+
+
+
+
+
+// Check if user is logged in
+
+const token = localStorage.getItem("access_token");
+
+if (!token) {
+
+console.warn("No access token found, redirecting to login.");
+
+window.location.href = "login.html";
+
+return; // Stop execution if not logged in
+
+}
+
+
+
+// Fetch and render projects
+
+// This call happens *after* we've confirmed projectsListContainer was found (or exited)
+
+fetchProjects();
+
+
+
+// Adjust table container height on resize
+
+window.addEventListener('resize', adjustTableHeight);
+
+adjustTableHeight(); // Call initially to set height on page load
+
+});
+
+
+
+/**
+
+* Fetches project data from the backend API.
+
+*/
+
+async function fetchProjects() {
+
+const token = localStorage.getItem("access_token");
+
+
+
+if (!token) {
+
+console.error("Token missing during fetchProjects call.");
+
+// This case should ideally be caught by the DOMContentLoaded check, but good to be safe.
+
+if (projectsListContainer) { // Use the variable, which should now be valid or error handled earlier
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Authentication failed. Please log in.</td></tr>';
+
+} else {
+
+console.error("Cannot display auth error, projectsListContainer is null.");
+
+}
+
+alert("Authentication failed. Please log in again.");
+
+window.location.href = "login.html";
+
+return;
+
+}
+
+
+
+try {
+
+// Use the API_BASE_URL directly as per your provided JS
+
+// Remember the 405 error from before - ensure this endpoint/method is correct on backend!
+
+const response = await fetch(`${API_BASE_URL}`, {
+
+method: 'GET', // This needs to be the correct method allowed by your backend
+
+headers: {
+
+'Authorization': `Bearer ${token}`,
+
+'Content-Type': 'application/json'
+
+},
+
+});
+
+
+
+if (!response.ok) {
+
+let errorDetail = `Status: ${response.status}`;
+
+try {
+
+const errorData = await response.json();
+
+errorDetail = errorData.message || JSON.stringify(errorData);
+
+console.error('Failed to fetch projects (API Error):', response.status, errorData);
+
+} catch (e) {
+
+errorDetail = response.statusText;
+
+console.error('Failed to fetch projects (Non-JSON Error):', response.status, response.statusText);
+
+}
+
+
+
+if (projectsListContainer) { // Use the variable
+
+projectsListContainer.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Failed to load projects: ${errorDetail}</td></tr>`;
+
+} else {
+
+console.error("Cannot display fetch error, projectsListContainer is null.");
+
+}
+
+
+
+alert(`Failed to load projects: ${errorDetail}`);
+
+
+
+if (response.status === 401) {
+
+console.warn("Token expired or invalid, redirecting to login.");
+
+localStorage.removeItem("access_token");
+
+window.location.href = "login.html";
+
+}
+
+return;
+
+}
+
+
+
+const projects = await response.json();
+
+console.log("Successfully fetched projects:", projects);
+
+renderProjects(projects); // Call renderProjects if successful
+
+
+
+} catch (error) {
+
+console.error('Error fetching projects:', error);
+
+if (projectsListContainer) { // Use the variable
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error connecting to the server. Please try again later.</td></tr>';
+
+} else {
+
+console.error("Cannot display connection error, projectsListContainer is null.");
+
+}
+
+alert('Failed to load projects. Please check your network connection and try again later.');
+
+}
+
+}
+
+
+
+/**
+
+* Renders the list of projects into the table body.
+
+* @param {Array<Object>} projects - An array of project objects.
+
+*/
+
+function renderProjects(projects) {
+
+// This check is here as a safeguard, but if the check in DOMContentLoaded passed
+
+// and execution wasn't stopped, this variable *should* be assigned.
+
+// If this error still occurs after the added checks in DOMContentLoaded,
+
+// it suggests a very unusual issue (e.g., variable somehow overwritten or element removed).
+
+if (!projectsListContainer) {
+
+console.error("Assertion failed: projectsListContainer is null in renderProjects."); // More assertive message
+
+// Fallback: try getting it again (less efficient/ideal, but for debugging)
+
+projectsListContainer = document.getElementById('projectsList');
+
+if (!projectsListContainer) {
+
+console.error("Fallback: Still couldn't find #projectsList.");
+
+return; // Give up if fallback fails
+
+} else {
+
+console.warn("Fallback: Found #projectsList during render.");
+
+}
+
+}
+
+
+
+projectsListContainer.innerHTML = ''; // Clear existing content
+
+
+
+if (!projects || projects.length === 0) {
+
+projectsListContainer.innerHTML = '<tr><td colspan="7" style="text-align: center;">No projects found.</td></tr>';
+
+return;
+
+}
+
+
+
+projects.forEach(project => { /* ... rest of rendering loop ... */
+
+const row = document.createElement("tr");
+
+row.innerHTML = `
+
+<td>
+
+<a href="projectmanagement.html?id=${project.id}" class="project-link">
+
+${project.name || 'N/A'}
+
+</a>
+
+</td>
+
+<td>${project.projectManager || 'N/A'}</td>
+
+<td>${project.description || 'N/A'}</td>
+
+<td>${formatDate(project.startDate) || 'N/A'}</td>
+
+<td>${formatDate(project.endDate) || 'N/A'}</td>
+
+<td><span class="status-badge ${getStatusClass(project.status)}">${project.status || 'N/A'}</span></td>
+
+<td>${formatDate(project.createdOn) || 'N/A'}</td>
+
+`;
+
+projectsListContainer.appendChild(row);
+
+});
+
+}
+
+
+
+// ... (formatDate, getStatusClass, adjustTableHeight, fetchUserProfile functions remain the same) ...
+
+
+
+function formatDate(dateString) { /* ... */ return 'N/A'; }
+
+function getStatusClass(status) { /* ... */ return 'status-default'; }
+
+function adjustTableHeight() { /* ... */ }
+
+async function fetchUserProfile() { /* ... */ return null; }
+
+</script>
+
+
+
+</body>
+
+</html>
+

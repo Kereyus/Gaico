@@ -733,3 +733,149 @@ html, body {
 .product-owner, .product-manager {
     width: 30%;
 }
+
+
+
+
+
+/* STYLING FOR TIMELINE, DONT TOUCH */
+body {
+  background-color: #1e1e1e; /* Dark background */
+  color: #f5f5f5; /* Light text color */
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Calendar container */
+.calendar-container {
+  width: 70%; /* Reduced width to make the calendar smaller */
+  max-width: 1000px; /* Maximum width for the grid */
+  margin: 0 auto; /* Center the calendar container */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+button {
+  background-color: #333;
+  color: #fff;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 10px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+/* Calendar grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* Keep 7 columns */
+  gap: 10px;
+}
+
+/* Make each calendar day item square-shaped with smaller size */
+.calendar-day-item {
+  background-color: #2d2d2d; /* Gray background for empty days */
+  color: #f5f5f5;
+  padding: 0;
+  border: 1px solid #e0e0e0; /* Light gray border */
+  border-radius: 8px;
+  text-align: center;
+  position: relative;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 0;
+  padding-bottom: 100%; /* Maintain square aspect ratio */
+}
+
+.calendar-day-item:hover {
+  background-color: #444;
+}
+
+.calendar-day-item .date-number {
+  font-size: 12px; /* Further reduced font size for date */
+  font-weight: bold;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+/* Task styling inside the calendar grid */
+.task {
+  background-color: #444; /* Darker gray for tasks */
+  color: #d1d1d1; /* Light gray text */
+  padding: 6px;
+  margin-top: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px; /* Smaller font size for tasks */
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.task:hover {
+  background-color: #1d9d58; /* Green color for hover effect */
+  transform: translateY(-3px);
+  color: white;
+}
+
+/* Task details popup (hover effect) */
+.task-details-popup {
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 200px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+}
+
+.task-details-popup strong {
+  color: #1d9d58; /* Green for labels */
+}
+
+.task-details-popup p {
+  margin: 5px 0;
+}
+
+/* Month label */
+#monthLabel {
+  color: #fff;
+  font-size: 16px; /* Smaller font size for the month label */
+  font-weight: bold;
+}
+
+/* Weekday labels */
+.calendar-weekdays {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px; /* Space between the weekday labels and the calendar days */
+}
+
+.weekday-label {
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: #333; /* Dark background for the weekday labels */
+  color: white;
+  width: 14%; /* Ensure equal width for each label */
+  text-transform: uppercase;
+}
+/* STYLING FOR TIMELINE ENDS HERE */

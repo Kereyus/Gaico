@@ -760,7 +760,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: -10px;
 }
 
 button {
@@ -825,18 +825,59 @@ button:hover {
   cursor: pointer;
   font-size: 12px; /* Smaller font size for tasks */
   text-align: center;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease;
+  position: absolute; /* Absolute positioning to fill the calendar cell */
+  top: -5px; /* Move the task box slightly upwards */
+  left: 0; /* Align task box to the left */
+  width: 100%; /* Make task fill the entire calendar grid cell */
+  height: 100%; /* Make task fill the entire calendar grid cell */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Stack the content vertically */
+  overflow: hidden; /* Prevent text from spilling out */
+  box-sizing: border-box; /* Ensure padding and border are considered in the size */
+  padding-left: 10px; /* Space on the left for the end date */
 }
 
+/* Task end date styling in the top left corner */
+.task .end-date {
+  font-size: 10px;
+  font-weight: bold;
+  color: #f5f5f5;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+/* Task name styling */
+.task .task-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px; /* Add space between the task name and project */
+  color: #f5f5f5;
+}
+
+/* Task project styling */
+.task .task-project {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* Task hover effect */
 .task:hover {
   background-color: #1d9d58; /* Green color for hover effect */
-  transform: translateY(-3px);
   color: white;
+  transform: none; /* Remove any transform to stop the task from moving */
 }
+
 
 /* Task details popup (hover effect) */
 .task-details-popup {
-  position: absolute;
+  position: fixed; /* Fixed positioning to keep the popup on screen */
   background-color: #333;
   color: #fff;
   padding: 10px;
@@ -844,7 +885,16 @@ button:hover {
   max-width: 200px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
-  display: none;
+  display: none; /* Initially hidden */
+  left: calc(100% + 10px); /* Position the popup to the right of the calendar grid */
+  top: 50%; /* Vertically center it */
+  transform: translateY(0%); 
+}
+
+/* Ensuring the task details popup stays within the viewport */
+.task-details-popup[data-position="right"] {
+  right: 10px;
+  left: auto;
 }
 
 .task-details-popup strong {
@@ -854,6 +904,7 @@ button:hover {
 .task-details-popup p {
   margin: 5px 0;
 }
+
 
 /* Month label */
 #monthLabel {
@@ -878,4 +929,5 @@ button:hover {
   width: 14%; /* Ensure equal width for each label */
   text-transform: uppercase;
 }
+
 /* STYLING FOR TIMELINE ENDS HERE */

@@ -1,11 +1,29 @@
-const API_BASE = "http://localhost:8080"; // Update this with your API base URL
 const token = localStorage.getItem("access_token");
 let currentDate = new Date(2025, 3, 1); // Start with April 2025
+
+// Fetch tasks from the backend based on the current month
+function fetchTasks() {
+  const month = currentDate.getMonth() + 1; // Backend expects 1-based month (1 for January, 12 for December)
+  const year = currentDate.getFullYear();
+
+  fetch(`/api/tasks?month=${month}&year=${year}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}` // Assuming JWT token for authentication
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      // Populate tasks in the calendar
+      loadTasks(data.tasks); // Pass the tasks to loadTasks function
+    })
+    .catch(error => console.error('Error fetching tasks:', error));
+}
 
 // Load the current month and update the grid
 window.onload = () => {
   buildCalendar(currentDate); // Ensure calendar is built on load
-  loadTasks();
+  fetchTasks(); // Fetch tasks from the backend
   updateMonthLabel();
   document.getElementById("prevMonthBtn").addEventListener("click", changeMonth);
   document.getElementById("nextMonthBtn").addEventListener("click", changeMonth);
@@ -23,7 +41,7 @@ function changeMonth(event) {
   if (currentDate.getFullYear() === 2025) {
     buildCalendar(currentDate); // Rebuild the calendar
     updateMonthLabel(); // Update the month label
-    loadTasks(); // Load tasks for the new month
+    fetchTasks(); // Fetch tasks for the new month
   } else {
     currentDate.setMonth(currentDate.getMonth() - (event.target.id === "nextMonthBtn" ? 1 : -1)); // Revert if out of bounds
   }
@@ -35,10 +53,6 @@ function updateMonthLabel() {
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   monthLabel.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 }
-
-
-
-
 
 // Build the calendar grid (with correct days)
 function buildCalendar(date) {
@@ -62,6 +76,7 @@ function buildCalendar(date) {
   for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "calendar-day-item";
+    dayDiv.id = `day${day}`; // Assign id to each day cell
     const dateNumber = document.createElement("div");
     dateNumber.className = "date-number";
     dateNumber.textContent = day;
@@ -70,65 +85,83 @@ function buildCalendar(date) {
   }
 }
 
-// Fetch tasks from the backend and display them on the calendar
-async function loadTasks() {
-  const taskRes = await fetch(`${API_BASE}/tasks`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+// Load tasks and add them to the calendar grid
+function loadTasks(tasks) {
+  tasks.forEach((task) => {
+    const taskEndDate = new Date(task.endDate);
 
-  const taskData = await taskRes.json();
-  const tasks = Array.isArray(taskData) ? taskData : taskData.tasks || [];
+    // Only load tasks that have their end date in the current month
+    if (taskEndDate.getMonth() === currentDate.getMonth() && taskEndDate.getFullYear() === currentDate.getFullYear()) {
+      const taskDay = task.endDate.getDate();
 
-  // Empty task list for the current month
-  for (let i = 1; i <= 31; i++) {
-    const taskDay = document.getElementById(`day${i}`);
-    if (taskDay) {
-      taskDay.innerHTML = `<div class="date-number">${i}</div>`; // Default display of the date
-    }
-  }
+      // Create the task element and add it to the calendar
+      const taskElement = createTaskElement(task, taskDay);
 
-  tasks.forEach(task => {
-    const taskDate = new Date(task.dueDate);
-    if (taskDate.getMonth() === currentDate.getMonth() && taskDate.getFullYear() === currentDate.getFullYear()) {
-      const taskDay = taskDate.getDate(); // Get the day of the month (1-31)
-      const taskElement = document.createElement("div");
-      taskElement.className = "task";
-      taskElement.textContent = task.title;
-      taskElement.addEventListener("mouseenter", () => showTaskDetails(task));
-
-      const taskDayCell = document.getElementById(`day${taskDay}`);
-      if (taskDayCell) {
-        taskDayCell.appendChild(taskElement); // Add task to the respective day cell
+      const dayCell = document.getElementById(`day${taskDay}`);
+      if (dayCell) {
+        dayCell.appendChild(taskElement); // Add task to the correct day cell
       }
     }
   });
 }
 
+// Helper function to create task element
+function createTaskElement(task, taskDay) {
+  const taskElement = document.createElement("div");
+  taskElement.className = "task";
+
+  // Create the end date element (only show the date number)
+  const endDateElement = document.createElement("div");
+  endDateElement.className = "end-date";
+  endDateElement.textContent = taskDay;
+
+  // Create the task name element
+  const taskNameElement = document.createElement("div");
+  taskNameElement.className = "task-name";
+  taskNameElement.textContent = task.title;
+
+  // Create the task project element
+  const taskProjectElement = document.createElement("div");
+  taskProjectElement.className = "task-project";
+  taskProjectElement.textContent = task.project;
+
+  // Append the elements to the task
+  taskElement.appendChild(endDateElement);
+  taskElement.appendChild(taskNameElement);
+  taskElement.appendChild(taskProjectElement);
+
+  // Add event listener for hover (to show task details)
+  taskElement.addEventListener("mouseenter", (event) => showTaskDetails(task, event));
+  taskElement.addEventListener("mouseleave", hideTaskDetails);
+
+  return taskElement;
+}
+
 // Display task details on hover
-function showTaskDetails(task) {
+let popupTimeout = null;
+
+function showTaskDetails(task, event) {
   const taskDetail = document.getElementById("taskDetailsPopup");
-  
+
   // Populate the task details dynamically
-  taskDetail.innerHTML = `
+  taskDetail.innerHTML = ` 
     <strong>Task Name:</strong> ${task.title}<br>
-    <strong>Description:</strong> ${task.description}<br>
     <strong>Start Date:</strong> ${task.startDate ? task.startDate : 'Not specified'}<br>
-    <strong>End Date:</strong> ${task.endDate ? task.endDate : 'Not specified'}
+    <strong>End Date:</strong> ${task.endDate ? task.endDate : 'Not specified'}<br>
+    <strong>Project:</strong> ${task.project ? task.project : 'Not specified'}
   `;
-  
-  // Show the popup
+
+  // Show the popup (set display to block)
   taskDetail.style.display = 'block';
 
   // Position the popup near the task element (adjust as needed)
   const taskElement = event.target; // This refers to the task element being hovered
   const rect = taskElement.getBoundingClientRect();
-  taskDetail.style.left = rect.left + 'px';
-  taskDetail.style.top = rect.bottom + 10 + 'px'; // Positioning slightly below the task
+  taskDetail.style.left = rect.right + 10 + 'px'; // Adjust to appear to the right of the task box
+  taskDetail.style.top = rect.top + 'px'; // Align top of popup with top of the task box
+}
 
-  // Hide the popup after 3 seconds (or customize as needed)
-  setTimeout(() => {
-    taskDetail.style.display = 'none';
-  }, 3000);
-  console.log("JavaScript is running!");  // Add this line to see if JS is loading
-
+function hideTaskDetails() {
+  const taskDetail = document.getElementById("taskDetailsPopup");
+  taskDetail.style.display = 'none'; // Hide the popup
 }

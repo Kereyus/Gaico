@@ -888,7 +888,7 @@ button:hover {
   display: none; /* Initially hidden */
   left: calc(100% + 10px); /* Position the popup to the right of the calendar grid */
   top: 50%; /* Vertically center it */
-  transform: translateY(0%); 
+  transform: translateY(-20%); 
 }
 
 /* Ensuring the task details popup stays within the viewport */

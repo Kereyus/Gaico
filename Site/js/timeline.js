@@ -1,5 +1,8 @@
 const token = localStorage.getItem("access_token");
-let currentDate = new Date(2025, 3, 1); // Start with April 2025
+
+// Dynamically set the current month and year based on today's date
+let currentDate = new Date();
+currentDate.setDate(1); // Set the day to the first to ensure we're viewing the correct month
 
 // Fetch tasks from the backend based on the current month
 function fetchTasks() {
@@ -9,7 +12,7 @@ function fetchTasks() {
   fetch(`/api/tasks?month=${month}&year=${year}`, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${token}` // Assuming JWT token for authentication
+      'Authorization': `Bearer ${token}` // Assuming JWT token for authentication 
     }
   })
     .then(response => response.json())
@@ -37,14 +40,10 @@ function changeMonth(event) {
     currentDate.setMonth(currentDate.getMonth() + 1); // Go to the next month
   }
 
-  // Ensure that the month stays within 2025
-  if (currentDate.getFullYear() === 2025) {
-    buildCalendar(currentDate); // Rebuild the calendar
-    updateMonthLabel(); // Update the month label
-    fetchTasks(); // Fetch tasks for the new month
-  } else {
-    currentDate.setMonth(currentDate.getMonth() - (event.target.id === "nextMonthBtn" ? 1 : -1)); // Revert if out of bounds
-  }
+  // Rebuild the calendar and update the month label
+  buildCalendar(currentDate);
+  updateMonthLabel();
+  fetchTasks(); // Fetch tasks for the new month
 }
 
 // Update the month label
@@ -105,7 +104,7 @@ function loadTasks(tasks) {
   });
 }
 
-// Helper function to create task element
+// Helper function to create task element (for the calendar grid)
 function createTaskElement(task, taskDay) {
   const taskElement = document.createElement("div");
   taskElement.className = "task";
@@ -125,10 +124,16 @@ function createTaskElement(task, taskDay) {
   taskProjectElement.className = "task-project";
   taskProjectElement.textContent = task.project;
 
-  // Append the elements to the task
+  // Create the task status element (to show on task box)
+  const taskStatusElement = document.createElement("div");
+  taskStatusElement.className = "task-status";
+  taskStatusElement.textContent = `Status: ${task.status}`; // Only show status here
+
+  // Append the elements to the task (only show name, project, and status)
   taskElement.appendChild(endDateElement);
   taskElement.appendChild(taskNameElement);
   taskElement.appendChild(taskProjectElement);
+  taskElement.appendChild(taskStatusElement); // Add status to task box
 
   // Add event listener for hover (to show task details)
   taskElement.addEventListener("mouseenter", (event) => showTaskDetails(task, event));
@@ -143,12 +148,14 @@ let popupTimeout = null;
 function showTaskDetails(task, event) {
   const taskDetail = document.getElementById("taskDetailsPopup");
 
-  // Populate the task details dynamically
+  // Populate the task details dynamically, including priority and status
   taskDetail.innerHTML = ` 
     <strong>Task Name:</strong> ${task.title}<br>
     <strong>Start Date:</strong> ${task.startDate ? task.startDate : 'Not specified'}<br>
     <strong>End Date:</strong> ${task.endDate ? task.endDate : 'Not specified'}<br>
-    <strong>Project:</strong> ${task.project ? task.project : 'Not specified'}
+    <strong>Project:</strong> ${task.project ? task.project : 'Not specified'}<br>
+    <strong>Priority:</strong> ${task.priority}<br>
+    <strong>Status:</strong> ${task.status}
   `;
 
   // Show the popup (set display to block)
@@ -165,3 +172,4 @@ function hideTaskDetails() {
   const taskDetail = document.getElementById("taskDetailsPopup");
   taskDetail.style.display = 'none'; // Hide the popup
 }
+

@@ -739,6 +739,7 @@ html, body {
 
 
 /* STYLING FOR TIMELINE, DONT TOUCH */
+/* General Styles */
 body {
   background-color: #1e1e1e; /* Dark background */
   color: #f5f5f5; /* Light text color */
@@ -760,7 +761,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: -10px;
+  margin-bottom: 20px;
 }
 
 button {
@@ -782,11 +783,11 @@ button:hover {
 /* Calendar grid */
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr); /* Keep 7 columns */
+  grid-template-columns: repeat(7, 1fr); /* 7 columns for each day of the week */
   gap: 10px;
 }
 
-/* Make each calendar day item square-shaped with smaller size */
+/* Each calendar day item should fit perfectly inside the grid cell */
 .calendar-day-item {
   background-color: #2d2d2d; /* Gray background for empty days */
   color: #f5f5f5;
@@ -795,24 +796,32 @@ button:hover {
   border-radius: 8px;
   text-align: center;
   position: relative;
-  transition: background-color 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;  /* Ensure each day cell stretches fully */
   height: 0;
-  padding-bottom: 100%; /* Maintain square aspect ratio */
+  padding-bottom: 100%;  /* Maintain square aspect ratio */
+  box-sizing: border-box;  /* Ensure padding is inside */
 }
 
-.calendar-day-item:hover {
-  background-color: #444;
-}
-
+/* Date number styling */
 .calendar-day-item .date-number {
-  font-size: 12px; /* Further reduced font size for date */
+  font-size: 14px;  /* Slightly larger font for date number */
   font-weight: bold;
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 5px;  /* Move to top */
+  left: 5px; /* Move to left */
+  z-index: 10; /* Make sure it's above other content */
+}
+
+/* Task container for stacking tasks */
+.task-container {
+  position: relative;
+  max-height: 120px; /* Limit the height of the task container */
+  overflow-y: auto;  /* Add vertical scrollbar if multiple tasks are present */
+  margin-top: 125px;
+  width: 100%;  /* Ensure the task container fits the full width of the cell */
 }
 
 /* Task styling inside the calendar grid */
@@ -820,43 +829,22 @@ button:hover {
   background-color: #444; /* Darker gray for tasks */
   color: #d1d1d1; /* Light gray text */
   padding: 6px;
-  margin-top: 5px;
-  border-radius: 8px;
+  margin-top: 0px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 12px; /* Smaller font size for tasks */
   text-align: center;
   transition: background-color 0.3s ease;
-  position: absolute; /* Absolute positioning to fill the calendar cell */
-  top: -5px; /* Move the task box slightly upwards */
-  left: 0; /* Align task box to the left */
-  width: 100%; /* Make task fill the entire calendar grid cell */
-  height: 100%; /* Make task fill the entire calendar grid cell */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column; /* Stack the content vertically */
-  overflow: hidden; /* Prevent text from spilling out */
-  box-sizing: border-box; /* Ensure padding and border are considered in the size */
-  padding-left: 10px; /* Space on the left for the end date */
-}
-
-/* Task end date styling in the top left corner */
-.task .end-date {
-  font-size: 10px;
-  font-weight: bold;
-  color: #f5f5f5;
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-  padding: 2px 5px;
-  border-radius: 4px;
+  width: 100%;
+  height: 120px; /* Ensure the task takes the full height of the cell */
+  box-sizing: border-box;
 }
 
 /* Task name styling */
 .task .task-name {
   font-size: 14px;
   font-weight: bold;
+  margin-top: 14px;
   margin-bottom: 5px; /* Add space between the task name and project */
   color: #f5f5f5;
 }
@@ -867,6 +855,28 @@ button:hover {
   color: #aaa;
 }
 
+/* Task status styling */
+.task .task-status {
+  font-size: 10px;
+  color: #fff;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Scrollbar styling for task container */
+.task-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.task-container::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 3px;
+}
+
+.task-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
 /* Task hover effect */
 .task:hover {
   background-color: #1d9d58; /* Green color for hover effect */
@@ -874,8 +884,7 @@ button:hover {
   transform: none; /* Remove any transform to stop the task from moving */
 }
 
-
-/* Task details popup (hover effect) */
+/* Task details popup */
 .task-details-popup {
   position: fixed; /* Fixed positioning to keep the popup on screen */
   background-color: #333;
@@ -886,25 +895,9 @@ button:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: none; /* Initially hidden */
-  left: calc(100% + 10px); /* Position the popup to the right of the calendar grid */
-  top: 50%; /* Vertically center it */
-  transform: translateY(-20%); 
+  left: 0;
+  top: 0;
 }
-
-/* Ensuring the task details popup stays within the viewport */
-.task-details-popup[data-position="right"] {
-  right: 10px;
-  left: auto;
-}
-
-.task-details-popup strong {
-  color: #1d9d58; /* Green for labels */
-}
-
-.task-details-popup p {
-  margin: 5px 0;
-}
-
 
 /* Month label */
 #monthLabel {
@@ -929,5 +922,6 @@ button:hover {
   width: 14%; /* Ensure equal width for each label */
   text-transform: uppercase;
 }
+
 
 /* STYLING FOR TIMELINE ENDS HERE */

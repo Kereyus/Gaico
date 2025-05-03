@@ -9,7 +9,7 @@ function fetchTasks() {
   const month = currentDate.getMonth() + 1; // Backend expects 1-based month (1 for January, 12 for December)
   const year = currentDate.getFullYear();
 
-  fetch(`/api/tasks?month=${month}&year=${year}`, {
+  fetch(`http://localhost:8080/api/issues?month=${month}&year=${year}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}` // Assuming JWT token for authentication 
@@ -18,7 +18,7 @@ function fetchTasks() {
     .then(response => response.json())
     .then(data => {
       // Populate tasks in the calendar
-      loadTasks(data.tasks); // Pass the tasks to loadTasks function
+      loadTasks(data); // Pass the tasks to loadTasks function
     })
     .catch(error => console.error('Error fetching tasks:', error));
 }
@@ -91,14 +91,17 @@ function loadTasks(tasks) {
 
     // Only load tasks that have their end date in the current month
     if (taskEndDate.getMonth() === currentDate.getMonth() && taskEndDate.getFullYear() === currentDate.getFullYear()) {
-      const taskDay = task.endDate.getDate();
+      const taskDay = taskEndDate.getDate();  
 
       // Create the task element and add it to the calendar
       const taskElement = createTaskElement(task, taskDay);
 
       const dayCell = document.getElementById(`day${taskDay}`);
       if (dayCell) {
-        dayCell.appendChild(taskElement); // Add task to the correct day cell
+        const taskContainer = dayCell.querySelector('.task-container') || document.createElement('div');
+        taskContainer.className = 'task-container';
+        taskContainer.appendChild(taskElement); // Add task to the container
+        dayCell.appendChild(taskContainer); // Add the container to the day cell
       }
     }
   });
@@ -108,11 +111,6 @@ function loadTasks(tasks) {
 function createTaskElement(task, taskDay) {
   const taskElement = document.createElement("div");
   taskElement.className = "task";
-
-  // Create the end date element (only show the date number)
-  const endDateElement = document.createElement("div");
-  endDateElement.className = "end-date";
-  endDateElement.textContent = taskDay;
 
   // Create the task name element
   const taskNameElement = document.createElement("div");
@@ -130,7 +128,6 @@ function createTaskElement(task, taskDay) {
   taskStatusElement.textContent = `Status: ${task.status}`; // Only show status here
 
   // Append the elements to the task (only show name, project, and status)
-  taskElement.appendChild(endDateElement);
   taskElement.appendChild(taskNameElement);
   taskElement.appendChild(taskProjectElement);
   taskElement.appendChild(taskStatusElement); // Add status to task box
@@ -172,4 +169,3 @@ function hideTaskDetails() {
   const taskDetail = document.getElementById("taskDetailsPopup");
   taskDetail.style.display = 'none'; // Hide the popup
 }
-

@@ -106,8 +106,8 @@
       const token = localStorage.getItem("access_token");
       if (!token) {
         console.warn("No access token found, redirecting to login.");
-        // window.location.href = "login.html";
-        // return; // Stop execution if not logged in
+         window.location.href = "login.html";
+         return; // Stop execution if not logged in
       }
 
       // Fetch and render projects

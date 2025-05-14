@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Closing Phase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet"> 
+
+</head>
+<body class="closing-page">
+<header class="navbar">
+  <a href="index.html" class="logo-container">
+    <img src="assets/logo.png" alt="Logo" class="logo-img" />
+  </a>
+  <div class="top-navbar">
+    <div class="top-left">
+      <input
+        type="text"
+        class="search-bar"
+        placeholder="Search…"
+        aria-label="Search projects"
+      />
+    </div>
+    <div class="top-right" id="auth-control">
+    </div>
+  </div>
+  <div class="bottom-navbar">
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="projectlisting.html">
+        <img src="assets/projects.png" alt="" class="icon" />
+        <span class="link-text">Home</span>
+      </a>
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="" class="icon" />
+        <span class="link-text">Dashboard</span>
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="" class="icon" />
+        <span class="link-text">Timeline</span>
+      </a>
+      <a href="projects.html">
+        <img src="assets/create.png" alt="" class="icon" />
+        <span class="link-text">New Project</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+
+    <div class="container">
+        <h2>Project Closing Phase</h2>
+
+        <div id="projectInfo">
+            <p>Project: <strong id="projectName">Loading...</strong></p>
+            <p>Project ID: <strong id="projectIdDisplay">Loading...</strong></p>
+            <hr>
+        </div>
+
+        <div id="closingStatusDisplay" class="final-status" style="display: none;">
+            <h3>Final Project Status</h3>
+            <p><strong>Status:</strong> <span id="finalStatus"></span></p>
+            <p><strong>Actual End Date:</strong> <span id="actualEndDateDisplay"></span></p>
+            <p><strong>Key Accomplishments:</strong> <span id="accomplishmentsDisplay"></span></p>
+            <p><strong>Lessons Learned:</strong> <span id="lessonsLearnedDisplay"></span></p>
+            <p><em>Project formally closed.</em></p>
+        </div>
+
+
+        <form id="closingForm" style="display: block;">
+            <h3>Submit Closing Details</h3>
+            <div class="form-group">
+                <label for="actualEndDate">Actual End Date:</label>
+                <input type="date" id="actualEndDate" required>
+            </div>
+            <div class="form-group">
+                <label for="accomplishments">Key Accomplishments Summary:</label>
+                <textarea id="accomplishments" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="lessonsLearned">Lessons Learned Summary:</label>
+                <textarea id="lessonsLearned" rows="4"></textarea>
+            </div>
+            <button type="submit">Submit Closing Details</button>
+        </form>
+
+        <div id="statusMessage" class="status"></div>
+
+    </div> <script>
+        // !! IMPORTANT !! Configure your API Base URL and Endpoints
+        const API_BASE_URL = ''; // e.g., 'https://your-backend-api.com'
+        const API_ENDPOINTS = {
+            // Endpoint to get details for a specific project (including potential existing closing info)
+            projectDetails: (projectId) => `${API_BASE_URL}/api/projects/${projectId}`,
+            // Endpoint to submit or update closing details for a project
+            submitClosing: (projectId) => `${API_BASE_URL}/api/projects/${projectId}/close`
+        };
+
+        // Function to get authentication token (replace with your actual auth logic)
+        function getAuthToken() {
+            // Example: Get token from localStorage
+            // const token = localStorage.getItem("access_token");
+            // return token ? `Bearer ${token}` : ''; // Example for Bearer token
+            return ''; // Return empty string if no authentication is needed yet
+        }
+
+        // Helper function for making API requests
+        async function apiRequest(url, method = 'GET', data = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            const authToken = getAuthToken();
+            if (authToken) {
+                headers['Authorization'] = authToken;
+            }
+
+            const config = {
+                method,
+                headers,
+            };
+
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(url, config);
+
+                if (!response.ok) {
+                     const errorDetail = await response.text(); // Or response.json() if backend sends JSON errors
+                     console.error(`API Error: ${response.status} - ${response.statusText}`, errorDetail);
+                     // Attempt to parse JSON error if possible, otherwise use text
+                     let errorMsg = errorDetail;
+                     try {
+                         const errorJson = JSON.parse(errorDetail);
+                         // Adjust this based on your backend's error response structure
+                         if (errorJson.message) errorMsg = errorJson.message;
+                         else if (errorJson.error) errorMsg = errorJson.error;
+                          else errorMsg = JSON.stringify(errorJson); // Fallback
+                     } catch (e) {
+                         // Ignore parsing error, use text
+                     }
+
+                    throw new Error(`Error: ${response.status} ${response.statusText} - ${errorMsg}`);
+                }
+
+                 // Return response JSON if status is not 204 (No Content) and not a DELETE which might return nothing
+                 if (response.status !== 204 && method !== 'DELETE' && response.headers.get('Content-Length') !== '0') {
+                     return await response.json();
+                 }
+
+                return null; // Return null for successful operations with no content
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error; // Re-throw to be handled by the calling function
+            }
+        }
+
+        // Function to display status messages
+        function showStatusMessage(message, isSuccess) {
+            const statusMessageDiv = document.getElementById('statusMessage');
+            statusMessageDiv.textContent = message;
+            statusMessageDiv.className = 'statusMessage ' + (isSuccess ? 'success' : 'error');
+            statusMessageDiv.style.display = 'block';
+             setTimeout(() => {
+                 statusMessageDiv.style.display = 'none'; // Hide after a few seconds
+             }, 5000); // Adjust time as needed
+        }
+
+         // Function to get project ID from URL (Example: closing.html?projectId=123)
+         function getProjectIdFromUrl() {
+             const params = new URLSearchParams(window.location.search);
+             const projectId = params.get('projectId');
+             // You might need validation here to ensure projectId is valid (e.g., a number)
+             return projectId;
+         }
+
+         let currentProjectId = null; // Store the current project ID
+
+        // Function to load project details and potentially existing closing info
+        async function loadProjectDetails(projectId) {
+             const projectNameEl = document.getElementById('projectName');
+             const projectIdDisplayEl = document.getElementById('projectIdDisplay');
+             const closingForm = document.getElementById('closingForm');
+             const closingStatusDisplay = document.getElementById('closingStatusDisplay');
+
+             projectNameEl.textContent = 'Loading...';
+             projectIdDisplayEl.textContent = projectId || 'N/A';
+             closingForm.style.display = 'none'; // Hide form while loading
+             closingStatusDisplay.style.display = 'none'; // Hide display while loading
+
+
+            if (!projectId) {
+                projectNameEl.textContent = 'Error: No Project ID provided.';
+                 showStatusMessage('Cannot load project details: No Project ID found in URL.', false);
+                 return;
+            }
+
+            currentProjectId = projectId; // Store the ID
+
+            try {
+                // Fetch project details from backend
+                 // Assuming your backend returns project details AND closing info if it exists
+                const projectData = await apiRequest(API_ENDPOINTS.projectDetails(projectId));
+
+                projectNameEl.textContent = projectData.name || 'Unknown Project'; // Assuming backend returns project name
+                projectIdDisplayEl.textContent = projectData.id || projectId;
+
+                // Check if closing data exists in the response
+                // Adjust this based on how your backend structure returns closing info
+                if (projectData.closingDetails && projectData.closingDetails.status === 'Completed') { // Example condition
+                     // Display existing closing status
+                     document.getElementById('finalStatus').textContent = projectData.closingDetails.status || 'N/A';
+                     document.getElementById('actualEndDateDisplay').textContent = projectData.closingDetails.actualEndDate || 'N/A';
+                     document.getElementById('accomplishmentsDisplay').textContent = projectData.closingDetails.accomplishments || 'None provided';
+                     document.getElementById('lessonsLearnedDisplay').textContent = projectData.closingDetails.lessonsLearned || 'None provided';
+                     // Set other display elements...
+
+                     closingStatusDisplay.style.display = 'block'; // Show the display div
+                     closingForm.style.display = 'none'; // Keep form hidden if already closed
+
+                } else {
+                    // Show the form if closing details are not complete or don't exist
+                    closingForm.style.display = 'block';
+                    closingStatusDisplay.style.display = 'none';
+                     // Pre-fill actual end date with today's date as a suggestion
+                    document.getElementById('actualEndDate').valueAsDate = new Date();
+                }
+
+
+            } catch (error) {
+                projectNameEl.textContent = 'Error Loading Project';
+                 projectIdDisplayEl.textContent = projectId;
+                 showStatusMessage(`Failed to load project details: ${error.message}`, false);
+                 closingForm.style.display = 'block'; // Show form as fallback if loading failed
+            }
+        }
+
+
+        // Function to handle form submission
+        async function submitClosingDetails(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (!currentProjectId) {
+                 showStatusMessage('Cannot submit: No Project ID available.', false);
+                 return;
+            }
+
+            const actualEndDate = document.getElementById('actualEndDate').value;
+            const accomplishments = document.getElementById('accomplishments').value.trim();
+            const lessonsLearned = document.getElementById('lessonsLearned').value.trim();
+            // Get other form data as needed
+
+            // Basic client-side validation
+            if (!actualEndDate) {
+                showStatusMessage('Please provide an actual end date.', false);
+                return;
+            }
+             // Add more validation if necessary
+
+            // Prepare data to send to the backend
+            const closingData = {
+                actualEndDate: actualEndDate,
+                accomplishments: accomplishments,
+                lessonsLearned: lessonsLearned,
+                // Include other fields from your form
+                 status: 'Completed' // Example: setting status on submit
+            };
+
+            try {
+                // Send data to the backend
+                // Assuming your backend expects a POST or PUT request to update closing details
+                await apiRequest(API_ENDPOINTS.submitClosing(currentProjectId), 'POST', closingData);
+                // Or 'PUT' if you are updating
+                // await apiRequest(API_ENDPOINTS.submitClosing(currentProjectId), 'PUT', closingData);
+
+
+                showStatusMessage('Project closing details submitted successfully!', true);
+
+                 // Optionally, reload the page or update the display to show the submitted data
+                 // For this example, we'll just hide the form and show a success message
+                 document.getElementById('closingForm').style.display = 'none';
+                 // You might want to fetch and display the submitted data here instead
+                 loadProjectDetails(currentProjectId); // Reload to show final status display
+
+
+            } catch (error) {
+                showStatusMessage(`Failed to submit closing details: ${error.message}`, false);
+                console.error('Submit closing failed:', error);
+            }
+        }
+
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            const closingForm = document.getElementById('closingForm');
+            if (closingForm) {
+                closingForm.addEventListener('submit', submitClosingDetails);
+            }
+
+            // Get the project ID from the URL and load details
+            const projectId = getProjectIdFromUrl();
+            loadProjectDetails(projectId);
+
+             // Check if authentication is needed (uncomment and implement)
+             // const token = getAuthToken(); // Implement getAuthToken()
+             // if (!token && API_BASE_URL) { // Only redirect if backend is configured and token is missing
+             //     window.location.href = "login.html"; // Redirect to login if not authenticated
+             // } else {
+             //    // Data loading is now handled by loadProjectDetails
+             // }
+        });
+
+    </script>
+</body>
+</html>

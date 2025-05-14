@@ -1,0 +1,1243 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAICO</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet"> 
+    <title>Project Planning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+
+</head>
+<body>
+<header class="navbar">
+  <a href="index.html" class="logo-container">
+    <img src="assets/logo.png" alt="Logo" class="logo-img" />
+  </a>
+  <div class="top-navbar">
+    <div class="top-left">
+      <input
+        type="text"
+        class="search-bar"
+        placeholder="Search…"
+        aria-label="Search projects"
+      />
+    </div>
+    <div class="top-right" id="auth-control">
+    </div>
+  </div>
+  <div class="bottom-navbar">
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="projectlisting.html">
+        <img src="assets/projects.png" alt="" class="icon" />
+        <span class="link-text">Home</span>
+      </a>
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="" class="icon" />
+        <span class="link-text">Dashboard</span>
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="" class="icon" />
+        <span class="link-text">Timeline</span>
+      </a>
+      <a href="projects.html">
+        <img src="assets/create.png" alt="" class="icon" />
+        <span class="link-text">New Project</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+    <script>
+        // Authentication check (uncomment when implementing authentication)
+        // const token = localStorage.getItem("access_token");
+        // if (!token) window.location.href = "login.html";
+    </script>
+
+    <div class="planning-content" id="planningContent">
+        <h2>Project Planning</h2>
+
+        <div class="activities-container">
+            <div class="section-header" onclick="toggleSection('activities')">
+                <h3>Project Activities</h3>
+                <span class="toggle-icon" id="activities-toggle-icon">-</span>
+            </div>
+
+            <div class="section-content" id="activities-section">
+                <button class="btn btn-primary btn-add-activity" onclick="showActivityForm()">
+                    + Add New Activity
+                </button>
+
+                <div class="form-container activity-form" id="activityForm" style="display:none;">
+                    <form onsubmit="event.preventDefault(); saveActivity();">
+                        <fieldset>
+                            <legend id="activity-form-legend">Add New Activity</legend>
+                            <input type="hidden" id="editActivityId">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="activityName">Activity Name *</label>
+                                    <input type="text" id="activityName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="activityDuration">Duration (days) *</label>
+                                    <input type="number" id="activityDuration" min="1" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="activityCost">Estimated Cost ($)</label>
+                                    <input type="number" id="activityCost" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="activityBudget">Budget ($)</label>
+                                    <input type="number" id="activityBudget" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div id="activity-error" class="error-message"></div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="hideActivityForm()">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="saveActivityBtn">Save Activity</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <h4>Existing Activities:</h4>
+                <div class="activities-list" id="activitiesList">
+                    <p>Loading activities...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="work-packages-container" id="workPackagesSection" style="display:none;">
+            <div class="section-header">
+                <h3 id="selectedActivityTitle">Work Packages</h3>
+            </div>
+
+            <div class="section-content">
+                <div id="workpackage-placeholder" style="display: block; margin-bottom: 15px; color: #666;">
+                    Select an activity above to view or add its work packages.
+                </div>
+
+                <button class="btn btn-primary btn-add-workpackage" id="addWorkPackageBtn" style="display:none;" onclick="showWorkPackageForm()">
+                    + Add Work Package
+                </button>
+
+                <div class="form-container workpackage-form" id="workPackageForm" style="display:none;">
+                    <form onsubmit="event.preventDefault(); saveWorkPackage();">
+                        <fieldset>
+                            <legend id="wp-form-legend">Add New Work Package</legend>
+                            <input type="hidden" id="editWorkPackageId">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="workPackageName">Work Package Name *</label>
+                                    <input type="text" id="workPackageName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="workPackageDuration">Duration (days) *</label>
+                                    <input type="number" id="workPackageDuration" min="1" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="workPackageCost">Estimated Cost ($)</label>
+                                    <input type="number" id="workPackageCost" min="0" step="0.01" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="workPackageBudget">Budget ($)</label>
+                                    <input type="number" id="workPackageBudget" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div id="wp-error" class="error-message"></div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="hideWorkPackageForm()">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="saveWorkPackageBtn">Save Package</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div class="table-container" id="workPackagesTableContainer" style="display:none;">
+                    <table class="workpackage-table">
+                        <thead>
+                            <tr>
+                                <th>Work Package</th>
+                                <th>Duration</th>
+                                <th>Est. Cost</th>
+                                <th>Budget</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workPackagesList">
+                        </tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td><strong>Totals:</strong></td>
+                                <td id="totalDuration">0 days</td>
+                                <td id="totalCost">$0.00</td>
+                                <td id="totalBudget">$0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--
+    <script>
+        // --- Data Storage ---
+        // Using localStorage for persistence in this demo
+        // In a real application, this would connect to a backend API
+        
+        let planningData = {
+            activities: [],
+            currentActivityId: null
+        };
+
+        // --- Functions for Activities ---
+        function loadProjectData() {
+            const storedData = localStorage.getItem('planningData');
+            if (storedData) {
+                planningData = JSON.parse(storedData);
+            } else {
+                // Initialize with sample data for demo purposes
+                planningData = {
+                    activities: [
+                        {
+                            id: 1,
+                            name: "Research Phase",
+                            duration: 14,
+                            cost: 5000,
+                            budget: 6000,
+                            workPackages: [
+                                { id: 1, name: "Literature Review", duration: 7, cost: 2000, budget: 2500 },
+                                { id: 2, name: "Market Analysis", duration: 5, cost: 3000, budget: 3500 }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            name: "Development",
+                            duration: 30,
+                            cost: 15000,
+                            budget: 18000,
+                            workPackages: []
+                        }
+                    ],
+                    currentActivityId: null
+                };
+                saveProjectData();
+            }
+            renderActivities();
+            
+            // Check if content is loaded properly
+            setTimeout(checkContentSize, 500);
+        }
+        
+        function checkContentSize() {
+            const content = document.getElementById('planningContent');
+            const activitiesSection = document.getElementById('activities-section');
+            
+            if (content.offsetHeight < 300 || activitiesSection.offsetHeight < 100) {
+                console.warn("Warning: Planning content appears to be constrained. Setting explicit sizes.");
+                content.style.minHeight = "600px";
+                content.style.width = "100%";
+                activitiesSection.style.minHeight = "300px";
+                
+                // Force redraw
+                document.body.style.display = 'none';
+                document.body.offsetHeight; // Trigger a reflow
+                document.body.style.display = 'block';
+            }
+        }
+
+        function saveProjectData() {
+            localStorage.setItem('planningData', JSON.stringify(planningData));
+        }
+
+        function toggleSection(section) {
+            const sectionContent = document.getElementById(`${section}-section`);
+            const toggleIcon = document.getElementById(`${section}-toggle-icon`);
+            
+            if (sectionContent.style.display === 'none') {
+                sectionContent.style.display = 'block';
+                toggleIcon.textContent = '-';
+            } else {
+                sectionContent.style.display = 'none';
+                toggleIcon.textContent = '+';
+            }
+        }
+
+        function showActivityForm(activityId = null) {
+            // Reset form
+            document.getElementById('activity-error').textContent = '';
+            
+            if (activityId) {
+                // Edit mode
+                const activity = planningData.activities.find(a => a.id === activityId);
+                if (!activity) return;
+                
+                document.getElementById('editActivityId').value = activity.id;
+                document.getElementById('activityName').value = activity.name;
+                document.getElementById('activityDuration').value = activity.duration;
+                document.getElementById('activityCost').value = activity.cost;
+                document.getElementById('activityBudget').value = activity.budget;
+                document.getElementById('activity-form-legend').textContent = 'Edit Activity';
+                document.getElementById('saveActivityBtn').textContent = 'Update Activity';
+            } else {
+                // Add mode
+                document.getElementById('editActivityId').value = '';
+                document.getElementById('activityName').value = '';
+                document.getElementById('activityDuration').value = '';
+                document.getElementById('activityCost').value = '0';
+                document.getElementById('activityBudget').value = '0';
+                document.getElementById('activity-form-legend').textContent = 'Add New Activity';
+                document.getElementById('saveActivityBtn').textContent = 'Save Activity';
+            }
+            
+            document.getElementById('activityForm').style.display = 'block';
+        }
+
+        function hideActivityForm() {
+            document.getElementById('activityForm').style.display = 'none';
+        }
+
+        function saveActivity() {
+            const activityIdInput = document.getElementById('editActivityId').value;
+            const name = document.getElementById('activityName').value.trim();
+            const duration = parseInt(document.getElementById('activityDuration').value);
+            const cost = parseFloat(document.getElementById('activityCost').value) || 0;
+            const budget = parseFloat(document.getElementById('activityBudget').value) || 0;
+            const errorEl = document.getElementById('activity-error');
+            
+            // Validation
+            if (!name) {
+                errorEl.textContent = 'Activity name is required';
+                return;
+            }
+            
+            if (!duration || duration <= 0) {
+                errorEl.textContent = 'Duration must be a positive number';
+                return;
+            }
+            
+            if (cost < 0 || budget < 0) {
+                errorEl.textContent = 'Cost and budget cannot be negative';
+                return;
+            }
+            
+            if (activityIdInput) {
+                // Update existing activity
+                const activityId = parseInt(activityIdInput);
+                const activityIndex = planningData.activities.findIndex(a => a.id === activityId);
+                
+                if (activityIndex !== -1) {
+                    planningData.activities[activityIndex].name = name;
+                    planningData.activities[activityIndex].duration = duration;
+                    planningData.activities[activityIndex].cost = cost;
+                    planningData.activities[activityIndex].budget = budget;
+                }
+            } else {
+                // Add new activity
+                const newId = planningData.activities.length > 0 
+                    ? Math.max(...planningData.activities.map(a => a.id)) + 1 
+                    : 1;
+                
+                    planningData.activities.push({
+                    id: newId,
+                    name: name,
+                    duration: duration,
+                    cost: cost,
+                    budget: budget,
+                    workPackages: []
+                });
+            }
+            
+            saveProjectData();
+            renderActivities();
+            hideActivityForm();
+        }
+
+        function deleteActivity(activityId) {
+            if (confirm('Are you sure you want to delete this activity? All associated work packages will also be deleted.')) {
+                planningData.activities = planningData.activities.filter(a => a.id !== activityId);
+                
+                // If we deleted the currently selected activity, clear it
+                if (planningDatacurrentActivityId === activityId) {
+                    planningData.currentActivityId = null;
+                    hideWorkPackagesSection();
+                }
+                
+                saveProjectData();
+                renderActivities();
+            }
+        }
+
+        function renderActivities() {
+            const container = document.getElementById('activitiesList');
+            
+            if (planningData.activities.length === 0) {
+                container.innerHTML = '<p>No activities found. Click "Add New Activity" to create one.</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            planningData.activities.forEach(activity => {
+                const wps = activity.workPackages || [];
+                const wpCount = wps.length;
+                
+                const el = document.createElement('div');
+                el.className = 'activity-item' + (activity.id === planningData.currentActivityId ? ' activity-selected' : '');
+                el.dataset.id = activity.id;
+                
+                el.innerHTML = `
+                    <div class="activity-details">
+                        <h4>${activity.name} ${wpCount > 0 ? `<span class="badge">${wpCount} WP</span>` : ''}</h4>
+                        <p>Duration: ${activity.duration} days | Cost: $${activity.cost.toFixed(2)} | Budget: $${activity.budget.toFixed(2)}</p>
+                    </div>
+                    <div class="activity-actions">
+                        <button class="btn btn-secondary" onclick="editActivity(${activity.id})">Edit</button>
+                        <button class="btn btn-primary" onclick="showWorkPackages(${activity.id})">Work Packages</button>
+                        <button class="btn btn-secondary" onclick="deleteActivity(${activity.id})">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(el);
+            });
+        }
+
+        function editActivity(activityId) {
+            showActivityForm(activityId);
+        }
+
+        // --- Functions for Work Packages ---
+        function showWorkPackages(activityId) {
+            const activity = planningData.activities.find(a => a.id === activityId);
+            if (!activity) return;
+            
+            planningData.currentActivityId = activityId;
+            document.getElementById('selectedActivityTitle').textContent = `${activity.name} - Work Packages`;
+            document.getElementById('workPackagesSection').style.display = 'block';
+            document.getElementById('workpackage-placeholder').style.display = 'none';
+            document.getElementById('addWorkPackageBtn').style.display = 'block';
+            document.getElementById('workPackagesTableContainer').style.display = 'block';
+            
+            renderWorkPackages();
+            renderActivities(); // To update the selected state
+            saveProjectData();
+        }
+
+        function hideWorkPackagesSection() {
+            document.getElementById('workPackagesSection').style.display = 'none';
+            planningData.currentActivityId = null;
+        }
+
+        function showWorkPackageForm(workPackageId = null) {
+            document.getElementById('wp-error').textContent = '';
+            
+            if (workPackageId !== null) {
+                // Edit mode
+                const activity = planningData.activities.find(a => a.id === planningData.currentActivityId);
+                if (!activity) return;
+                
+                const wp = activity.workPackages.find(wp => wp.id === workPackageId);
+                if (!wp) return;
+                
+                document.getElementById('editWorkPackageId').value = wp.id;
+                document.getElementById('workPackageName').value = wp.name;
+                document.getElementById('workPackageDuration').value = wp.duration;
+                document.getElementById('workPackageCost').value = wp.cost;
+                document.getElementById('workPackageBudget').value = wp.budget;
+                document.getElementById('wp-form-legend').textContent = 'Edit Work Package';
+                document.getElementById('saveWorkPackageBtn').textContent = 'Update Package';
+            } else {
+                // Add mode
+                document.getElementById('editWorkPackageId').value = '';
+                document.getElementById('workPackageName').value = '';
+                document.getElementById('workPackageDuration').value = '';
+                document.getElementById('workPackageCost').value = '0';
+                document.getElementById('workPackageBudget').value = '0';
+                document.getElementById('wp-form-legend').textContent = 'Add New Work Package';
+                document.getElementById('saveWorkPackageBtn').textContent = 'Save Package';
+            }
+            
+            document.getElementById('workPackageForm').style.display = 'block';
+        }
+
+        function hideWorkPackageForm() {
+            document.getElementById('workPackageForm').style.display = 'none';
+        }
+
+        function saveWorkPackage() {
+            if (!planningData.currentActivityId) {
+                alert('No activity selected');
+                return;
+            }
+            
+            const wpIdInput = document.getElementById('editWorkPackageId').value;
+            const name = document.getElementById('workPackageName').value.trim();
+            const duration = parseInt(document.getElementById('workPackageDuration').value);
+            const cost = parseFloat(document.getElementById('workPackageCost').value) || 0;
+            const budget = parseFloat(document.getElementById('workPackageBudget').value) || 0;
+            const errorEl = document.getElementById('wp-error');
+            
+            // Validation
+            if (!name) {
+                errorEl.textContent = 'Work package name is required';
+                return;
+            }
+            
+            if (!duration || duration <= 0) {
+                errorEl.textContent = 'Duration must be a positive number';
+                return;
+            }
+            
+            if (cost < 0 || budget < 0) {
+                errorEl.textContent = 'Cost and budget cannot be negative';
+                return;
+            }
+            
+            const activityIndex = planningData.activities.findIndex(a => a.id === planningData.currentActivityId);
+            if (activityIndex === -1) return;
+            
+            if (wpIdInput) {
+                // Update existing work package
+                const wpId = parseInt(wpIdInput);
+                const wpIndex = planningData.activities[activityIndex].workPackages.findIndex(wp => wp.id === wpId);
+                
+                if (wpIndex !== -1) {
+                    planningData.activities[activityIndex].workPackages[wpIndex].name = name;
+                    planningData.activities[activityIndex].workPackages[wpIndex].duration = duration;
+                    planningData.activities[activityIndex].workPackages[wpIndex].cost = cost;
+                    planningData.activities[activityIndex].workPackages[wpIndex].budget = budget;
+                }
+            } else {
+                // Add new work package
+                const workPackages = planningData.activities[activityIndex].workPackages || [];
+                const newId = workPackages.length > 0 
+                    ? Math.max(...workPackages.map(wp => wp.id)) + 1 
+                    : 1;
+                
+                if (!planningData.activities[activityIndex].workPackages) {
+                    planningData.activities[activityIndex].workPackages = [];
+                }
+                
+                planningData.activities[activityIndex].workPackages.push({
+                    id: newId,
+                    name: name,
+                    duration: duration,
+                    cost: cost,
+                    budget: budget
+                });
+            }
+            
+            saveProjectData();
+            renderWorkPackages();
+            hideWorkPackageForm();
+        }
+
+        function editWorkPackage(workPackageId) {
+            showWorkPackageForm(workPackageId);
+        }
+
+        function deleteWorkPackage(workPackageId) {
+            if (!confirm('Are you sure you want to delete this work package?')) {
+                return;
+            }
+            
+            const activityIndex = planningData.activities.findIndex(a => a.id === planningData.currentActivityId);
+            if (activityIndex === -1) return;
+            
+            planningData.activities[activityIndex].workPackages = 
+            planningData.activities[activityIndex].workPackages.filter(wp => wp.id !== workPackageId);
+            
+            saveProjectData();
+            renderWorkPackages();
+            renderActivities(); // Update the WP count badge
+        }
+
+        function renderWorkPackages() {
+            if (!planningData.currentActivityId) return;
+            
+            const activity = planningData.activities.find(a => a.id === planningData.currentActivityId);
+            if (!activity) return;
+            
+            const workPackages = activity.workPackages || [];
+            const tableBody = document.getElementById('workPackagesList');
+            
+            if (workPackages.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5">No work packages found. Click "Add Work Package" to create one.</td></tr>';
+                updateWorkPackageTotals(0, 0, 0);
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            let totalDuration = 0;
+            let totalCost = 0;
+            let totalBudget = 0;
+            
+            workPackages.forEach(wp => {
+                totalDuration += wp.duration;
+                totalCost += wp.cost;
+                totalBudget += wp.budget;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${wp.name}</td>
+                    <td>${wp.duration} days</td>
+                    <td>$${wp.cost.toFixed(2)}</td>
+                    <td>$${wp.budget.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editWorkPackage(${wp.id})">Edit</button>
+                        <button class="btn btn-secondary" onclick="deleteWorkPackage(${wp.id})">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            updateWorkPackageTotals(totalDuration, totalCost, totalBudget);
+        }
+
+        function updateWorkPackageTotals(duration, cost, budget) {
+            document.getElementById('totalDuration').textContent = `${duration} days`;
+            document.getElementById('totalCost').textContent = `$${cost.toFixed(2)}`;
+            document.getElementById('totalBudget').textContent = `$${budget.toFixed(2)}`;
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure proper sizing for the planning container
+            const container = document.getElementById('planningContent');
+            if (container) {
+                // If the page is in an iframe or embedded context, adjust sizing
+                if (window !== window.parent) {
+                    container.style.width = '100%';
+                    container.style.minHeight = '600px';
+                    document.body.style.overflow = 'auto';
+                    document.body.style.height = '100%';
+                    document.body.style.width = '100%';
+                }
+            }
+            
+            loadProjectData();
+            
+            // Add window resize handler to ensure content remains properly sized
+            window.addEventListener('resize', function() {
+                checkContentSize();
+            });
+        });
+    </script>  
+</body>
+</html>
+
+-->
+<script>
+    // --- Backend API Configuration ---
+    // !! IMPORTANT !! Replace these with your actual backend API endpoints
+    const API_BASE_URL = ''; // e.g., 'https://your-backend-api.com'
+    const API_ENDPOINTS = {
+        activities: `${API_BASE_URL}/api/activities`,
+        activityById: (id) => `${API_BASE_URL}/api/activities/${id}`,
+        workPackagesByActivity: (activityId) => `${API_BASE_URL}/api/activities/${activityId}/workpackages`,
+        workPackageById: (id) => `${API_BASE_URL}/api/workpackages/${id}`
+    };
+
+    // Function to get authentication token (replace with your actual auth logic)
+    function getAuthToken() {
+        // const token = localStorage.getItem("access_token"); // Using localStorage example from original code
+        // return token ? `Bearer ${token}` : ''; // Example for Bearer token
+        return ''; // Return empty string if no authentication is needed or implemented yet
+    }
+
+    // Helper function for making API requests
+    async function apiRequest(url, method = 'GET', data = null) {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        const authToken = getAuthToken();
+        if (authToken) {
+            headers['Authorization'] = authToken;
+        }
+
+        const config = {
+            method,
+            headers,
+        };
+
+        if (data) {
+            config.body = JSON.stringify(data);
+        }
+
+        try {
+            const response = await fetch(url, config);
+
+            if (!response.ok) {
+                const errorDetail = await response.text(); // or response.json() if your backend sends JSON errors
+                console.error(`API Error: ${response.status} - ${response.statusText}`, errorDetail);
+                throw new Error(`Error: ${response.status} ${response.statusText} - ${errorDetail}`);
+            }
+
+            // Assuming successful requests return JSON. Adjust if your backend returns something else for specific endpoints (e.g., DELETE)
+            if (response.status === 204 || method === 'DELETE') { // No Content
+                return null;
+            }
+            
+            return await response.json();
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            // Depending on your UI framework, you might display this error to the user
+            throw error; // Re-throw to be handled by the calling function
+        }
+    }
+
+    // --- Data Storage (Frontend State) ---
+    // This will hold the current state fetched from the backend
+    let planningState = {
+        activities: [],
+        currentActivityId: null // ID of the currently selected activity for work packages
+    };
+
+    // --- Functions for Activities ---
+    async function loadProjectData() {
+        try {
+            planningState.activities = await apiRequest(API_ENDPOINTS.activities);
+            renderActivities();
+        } catch (error) {
+            console.error('Failed to load project data:', error);
+            document.getElementById('activitiesList').innerHTML = '<p style="color: red;">Failed to load activities. Please try again later.</p>';
+        } finally {
+             // Check if content is loaded properly after rendering
+             setTimeout(checkContentSize, 100); // Give rendering a moment
+        }
+    }
+
+    function checkContentSize() {
+        const content = document.getElementById('planningContent');
+        const activitiesSection = document.getElementById('activities-section');
+
+        if (content && activitiesSection) {
+             // Basic check, adjust threshold as needed
+             if (content.offsetHeight < 300 || activitiesSection.offsetHeight < 100) {
+                 console.warn("Warning: Planning content appears to be constrained. Setting explicit sizes.");
+                 content.style.minHeight = "600px";
+                 content.style.width = "100%";
+                 activitiesSection.style.minHeight = "300px";
+
+                 // Force redraw - sometimes necessary in complex layouts/iframes
+                 document.body.style.display = 'none';
+                 document.body.offsetHeight; // Trigger a reflow
+                 document.body.style.display = 'block';
+             }
+        }
+    }
+
+
+    function toggleSection(section) {
+        const sectionContent = document.getElementById(`${section}-section`);
+        const toggleIcon = document.getElementById(`${section}-toggle-icon`);
+
+        if (sectionContent.style.display === 'none') {
+            sectionContent.style.display = 'block';
+            toggleIcon.textContent = '-';
+        } else {
+            sectionContent.style.display = 'none';
+            toggleIcon.textContent = '+';
+        }
+    }
+
+    function showActivityForm(activityId = null) {
+        // Reset form and error message
+        document.getElementById('activity-error').textContent = '';
+        const form = document.getElementById('activityForm');
+        const saveBtn = document.getElementById('saveActivityBtn');
+        const legend = document.getElementById('activity-form-legend');
+
+        if (activityId !== null) {
+            // Edit mode
+            const activity = planningState.activities.find(a => a.id === activityId);
+            if (!activity) {
+                console.error('Activity not found for editing:', activityId);
+                return;
+            }
+
+            document.getElementById('editActivityId').value = activity.id;
+            document.getElementById('activityName').value = activity.name;
+            document.getElementById('activityDuration').value = activity.duration;
+            document.getElementById('activityCost').value = activity.cost;
+            document.getElementById('activityBudget').value = activity.budget;
+            legend.textContent = 'Edit Activity';
+            saveBtn.textContent = 'Update Activity';
+        } else {
+            // Add mode
+            document.getElementById('editActivityId').value = '';
+            document.getElementById('activityName').value = '';
+            document.getElementById('activityDuration').value = '';
+            document.getElementById('activityCost').value = '0';
+            document.getElementById('activityBudget').value = '0';
+            legend.textContent = 'Add New Activity';
+            saveBtn.textContent = 'Save Activity';
+        }
+
+        form.style.display = 'block';
+    }
+
+    function hideActivityForm() {
+        document.getElementById('activityForm').style.display = 'none';
+    }
+
+    async function saveActivity() {
+        const activityIdInput = document.getElementById('editActivityId').value;
+        const name = document.getElementById('activityName').value.trim();
+        const durationInput = document.getElementById('activityDuration').value;
+        const costInput = document.getElementById('activityCost').value;
+        const budgetInput = document.getElementById('activityBudget').value;
+        const errorEl = document.getElementById('activity-error');
+
+        errorEl.textContent = ''; // Clear previous errors
+
+         // Basic Validation
+        if (!name) {
+            errorEl.textContent = 'Activity name is required.';
+            return;
+        }
+        const duration = parseInt(durationInput);
+        if (isNaN(duration) || duration <= 0) {
+            errorEl.textContent = 'Duration must be a positive number.';
+            return;
+        }
+        const cost = parseFloat(costInput) || 0;
+        if (isNaN(cost) || cost < 0) {
+             errorEl.textContent = 'Estimated Cost must be a non-negative number.';
+             return;
+        }
+        const budget = parseFloat(budgetInput) || 0;
+         if (isNaN(budget) || budget < 0) {
+             errorEl.textContent = 'Budget must be a non-negative number.';
+             return;
+         }
+
+
+        const activityData = {
+            name: name,
+            duration: duration,
+            cost: cost,
+            budget: budget
+        };
+
+        try {
+            let resultActivity;
+            if (activityIdInput) {
+                // Update existing activity
+                const activityId = parseInt(activityIdInput);
+                resultActivity = await apiRequest(API_ENDPOINTS.activityById(activityId), 'PUT', activityData);
+
+                // Update the activity in the frontend state
+                const index = planningState.activities.findIndex(a => a.id === activityId);
+                 if (index !== -1) {
+                     // Merge updated properties, keeping workPackages if backend doesn't return them
+                     planningState.activities[index] = { ...planningState.activities[index], ...resultActivity };
+                 }
+
+            } else {
+                // Add new activity
+                resultActivity = await apiRequest(API_ENDPOINTS.activities, 'POST', activityData);
+                // Add the new activity (including its ID from the backend) to the state
+                planningState.activities.push({...resultActivity, workPackages: []}); // Assuming backend returns the new activity object
+            }
+
+            renderActivities(); // Re-render the list
+            hideActivityForm();
+
+        } catch (error) {
+            errorEl.textContent = `Failed to save activity: ${error.message}`;
+            console.error('Save activity failed:', error);
+        }
+    }
+
+    async function deleteActivity(activityId) {
+        if (confirm('Are you sure you want to delete this activity? This cannot be undone.')) {
+            try {
+                await apiRequest(API_ENDPOINTS.activityById(activityId), 'DELETE');
+
+                // Remove the activity from the frontend state
+                planningState.activities = planningState.activities.filter(a => a.id !== activityId);
+
+                // If we deleted the currently selected activity, clear it
+                if (planningState.currentActivityId === activityId) {
+                    planningState.currentActivityId = null;
+                    hideWorkPackagesSection();
+                }
+
+                renderActivities(); // Re-render the list
+
+            } catch (error) {
+                alert(`Failed to delete activity: ${error.message}`);
+                console.error('Delete activity failed:', error);
+            }
+        }
+    }
+
+    function renderActivities() {
+        const container = document.getElementById('activitiesList');
+
+        if (!container) {
+             console.error("Activities list container not found.");
+             return;
+        }
+
+        if (planningState.activities.length === 0) {
+            container.innerHTML = '<p>No activities found. Click "+ Add New Activity" to create one.</p>';
+            return;
+        }
+
+        container.innerHTML = ''; // Clear existing list
+
+        planningState.activities.forEach(activity => {
+            // Ensure workPackages is an array even if not present or null
+            const wps = activity.workPackages && Array.isArray(activity.workPackages) ? activity.workPackages : [];
+            const wpCount = wps.length;
+
+            const el = document.createElement('div');
+            el.className = 'activity-item' + (activity.id === planningState.currentActivityId ? ' activity-selected' : '');
+            el.dataset.id = activity.id;
+
+            el.innerHTML = `
+                <div class="activity-details">
+                    <h4>${activity.name} ${wpCount > 0 ? `<span class="badge">${wpCount} WP${wpCount > 1 ? 's' : ''}</span>` : ''}</h4>
+                    <p>Duration: ${activity.duration} days | Est. Cost: $${(activity.cost || 0).toFixed(2)} | Budget: $${(activity.budget || 0).toFixed(2)}</p>
+                </div>
+                <div class="activity-actions">
+                    <button class="btn btn-secondary" onclick="editActivity(${activity.id})">Edit</button>
+                    <button class="btn btn-primary" onclick="showWorkPackages(${activity.id})">Work Packages</button>
+                    <button class="btn btn-secondary" onclick="deleteActivity(${activity.id})">Delete</button>
+                </div>
+            `;
+
+            container.appendChild(el);
+        });
+    }
+
+    function editActivity(activityId) {
+        // Prevent default to avoid issues if called from an event handler
+        event.preventDefault();
+        showActivityForm(activityId);
+    }
+
+    // --- Functions for Work Packages ---
+    async function showWorkPackages(activityId) {
+        // Prevent default if called from an event handler
+        event.preventDefault();
+
+        const activity = planningState.activities.find(a => a.id === activityId);
+        if (!activity) {
+             console.error('Activity not found for showing work packages:', activityId);
+             return;
+        }
+
+        // Update the selected activity in the frontend state
+        planningState.currentActivityId = activityId;
+
+        // Update UI elements for Work Packages section
+        document.getElementById('selectedActivityTitle').textContent = `${activity.name} - Work Packages`;
+        document.getElementById('workPackagesSection').style.display = 'block';
+        document.getElementById('workpackage-placeholder').style.display = 'none';
+        document.getElementById('addWorkPackageBtn').style.display = 'block';
+        document.getElementById('workPackagesTableContainer').style.display = 'block';
+        document.getElementById('workPackagesList').innerHTML = '<tr><td colspan="5">Loading work packages...</td></tr>'; // Show loading indicator
+
+        // Highlight the selected activity in the list
+        renderActivities();
+
+        try {
+            // Fetch work packages for the selected activity
+             // Assuming the backend returns an array of work packages for the given activity ID
+            const workPackages = await apiRequest(API_ENDPOINTS.workPackagesByActivity(activityId));
+
+             // Update the work packages for this specific activity in the frontend state
+             // Find the activity by ID and replace its workPackages array
+             const activityIndex = planningState.activities.findIndex(a => a.id === activityId);
+             if(activityIndex !== -1) {
+                 planningState.activities[activityIndex].workPackages = workPackages;
+             }
+
+
+            renderWorkPackages(); // Render the fetched work packages
+
+        } catch (error) {
+             console.error('Failed to load work packages:', error);
+             document.getElementById('workPackagesList').innerHTML = '<tr><td colspan="5" style="color: red;">Failed to load work packages.</td></tr>';
+             updateWorkPackageTotals(0, 0, 0); // Reset totals on error
+        }
+    }
+
+    function hideWorkPackagesSection() {
+        document.getElementById('workPackagesSection').style.display = 'none';
+        planningState.currentActivityId = null;
+        renderActivities(); // Remove selected styling
+         document.getElementById('workpackage-placeholder').style.display = 'block'; // Show placeholder again
+         document.getElementById('addWorkPackageBtn').style.display = 'none'; // Hide add button
+         document.getElementById('workPackagesTableContainer').style.display = 'none'; // Hide table
+    }
+
+    function showWorkPackageForm(workPackageId = null) {
+         if (!planningState.currentActivityId) {
+            alert('Please select an activity first.');
+            return;
+        }
+
+        document.getElementById('wp-error').textContent = ''; // Clear previous errors
+        const form = document.getElementById('workPackageForm');
+        const saveBtn = document.getElementById('saveWorkPackageBtn');
+        const legend = document.getElementById('wp-form-legend');
+
+
+        if (workPackageId !== null) {
+            // Edit mode
+            const activity = planningState.activities.find(a => a.id === planningState.currentActivityId);
+            if (!activity || !activity.workPackages) return;
+
+            const wp = activity.workPackages.find(wp => wp.id === workPackageId);
+            if (!wp) {
+                console.error('Work package not found for editing:', workPackageId);
+                return;
+            }
+
+            document.getElementById('editWorkPackageId').value = wp.id;
+            document.getElementById('workPackageName').value = wp.name;
+            document.getElementById('workPackageDuration').value = wp.duration;
+            document.getElementById('workPackageCost').value = wp.cost;
+            document.getElementById('workPackageBudget').value = wp.budget;
+            legend.textContent = 'Edit Work Package';
+            saveBtn.textContent = 'Update Package';
+        } else {
+            // Add mode
+            document.getElementById('editWorkPackageId').value = '';
+            document.getElementById('workPackageName').value = '';
+            document.getElementById('workPackageDuration').value = '';
+            document.getElementById('workPackageCost').value = '0';
+            document.getElementById('workPackageBudget').value = '0';
+            legend.textContent = 'Add New Work Package';
+            saveBtn.textContent = 'Save Package';
+        }
+
+        form.style.display = 'block';
+    }
+
+    function hideWorkPackageForm() {
+        document.getElementById('workPackageForm').style.display = 'none';
+    }
+
+    async function saveWorkPackage() {
+        if (!planningState.currentActivityId) {
+            alert('No activity selected.');
+            return;
+        }
+
+        const wpIdInput = document.getElementById('editWorkPackageId').value;
+        const name = document.getElementById('workPackageName').value.trim();
+        const durationInput = document.getElementById('workPackageDuration').value;
+        const costInput = document.getElementById('workPackageCost').value;
+        const budgetInput = document.getElementById('workPackageBudget').value;
+        const errorEl = document.getElementById('wp-error');
+
+         errorEl.textContent = ''; // Clear previous errors
+
+        // Basic Validation
+        if (!name) {
+            errorEl.textContent = 'Work package name is required.';
+            return;
+        }
+        const duration = parseInt(durationInput);
+        if (isNaN(duration) || duration <= 0) {
+            errorEl.textContent = 'Duration must be a positive number.';
+            return;
+        }
+        const cost = parseFloat(costInput) || 0;
+        if (isNaN(cost) || cost < 0) {
+             errorEl.textContent = 'Estimated Cost must be a non-negative number.';
+             return;
+        }
+        const budget = parseFloat(budgetInput) || 0;
+         if (isNaN(budget) || budget < 0) {
+             errorEl.textContent = 'Budget must be a non-negative number.';
+             return;
+         }
+
+        const workPackageData = {
+            name: name,
+            duration: duration,
+            cost: cost,
+            budget: budget,
+            // You might need to include the activity ID in the data payload depending on your backend API
+             // activityId: planningState.currentActivityId // Example
+        };
+
+        try {
+            let resultWorkPackage;
+            const activityIndex = planningState.activities.findIndex(a => a.id === planningState.currentActivityId);
+            if (activityIndex === -1) {
+                 throw new Error("Selected activity not found in state.");
+            }
+
+            if (wpIdInput) {
+                // Update existing work package
+                const wpId = parseInt(wpIdInput);
+                 resultWorkPackage = await apiRequest(API_ENDPOINTS.workPackageById(wpId), 'PUT', workPackageData);
+
+                // Update the work package in the frontend state
+                const wpIndex = planningState.activities[activityIndex].workPackages.findIndex(wp => wp.id === wpId);
+                if (wpIndex !== -1) {
+                    planningState.activities[activityIndex].workPackages[wpIndex] = {...planningState.activities[activityIndex].workPackages[wpIndex], ...resultWorkPackage};
+                }
+
+            } else {
+                // Add new work package
+                 // Assuming POST to activity endpoint for adding WP
+                resultWorkPackage = await apiRequest(API_ENDPOINTS.workPackagesByActivity(planningState.currentActivityId), 'POST', workPackageData);
+
+                // Add the new work package (including its ID from the backend) to the state
+                 // Ensure workPackages array exists
+                if (!planningState.activities[activityIndex].workPackages) {
+                    planningState.activities[activityIndex].workPackages = [];
+                }
+                 planningState.activities[activityIndex].workPackages.push(resultWorkPackage); // Assuming backend returns the new WP object
+
+            }
+
+            renderWorkPackages(); // Re-render the list of WPs for the current activity
+            renderActivities(); // Update activity badge count
+            hideWorkPackageForm();
+
+        } catch (error) {
+            errorEl.textContent = `Failed to save work package: ${error.message}`;
+            console.error('Save work package failed:', error);
+        }
+    }
+
+    function editWorkPackage(workPackageId) {
+         // Prevent default if called from an event handler
+        event.preventDefault();
+        showWorkPackageForm(workPackageId);
+    }
+
+    async function deleteWorkPackage(workPackageId) {
+        if (!planningState.currentActivityId) {
+            alert('No activity selected.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this work package? This cannot be undone.')) {
+            try {
+                await apiRequest(API_ENDPOINTS.workPackageById(workPackageId), 'DELETE');
+
+                // Remove the work package from the frontend state
+                const activityIndex = planningState.activities.findIndex(a => a.id === planningState.currentActivityId);
+                if (activityIndex !== -1 && planningState.activities[activityIndex].workPackages) {
+                    planningState.activities[activityIndex].workPackages =
+                        planningState.activities[activityIndex].workPackages.filter(wp => wp.id !== workPackageId);
+                }
+
+                renderWorkPackages(); // Re-render WPs for the current activity
+                renderActivities(); // Update activity badge count
+
+            } catch (error) {
+                alert(`Failed to delete work package: ${error.message}`);
+                console.error('Delete work package failed:', error);
+            }
+        }
+    }
+
+    function renderWorkPackages() {
+        const tableBody = document.getElementById('workPackagesList');
+        const activity = planningState.activities.find(a => a.id === planningState.currentActivityId);
+
+         if (!tableBody) {
+             console.error("Work packages table body not found.");
+             return;
+         }
+
+        if (!activity || !activity.workPackages || activity.workPackages.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5">No work packages found. Click "+ Add Work Package" to create one.</td></tr>';
+            updateWorkPackageTotals(0, 0, 0);
+            return;
+        }
+
+        tableBody.innerHTML = ''; // Clear existing rows
+        let totalDuration = 0;
+        let totalCost = 0;
+        let totalBudget = 0;
+
+        activity.workPackages.forEach(wp => {
+            totalDuration += wp.duration || 0;
+            totalCost += wp.cost || 0;
+            totalBudget += wp.budget || 0;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${wp.name}</td>
+                <td>${wp.duration || 0} days</td>
+                <td>$${(wp.cost || 0).toFixed(2)}</td>
+                <td>$${(wp.budget || 0).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-secondary" onclick="editWorkPackage(${wp.id})">Edit</button>
+                    <button class="btn btn-secondary" onclick="deleteWorkPackage(${wp.id})">Delete</button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+        updateWorkPackageTotals(totalDuration, totalCost, totalBudget);
+    }
+
+    function updateWorkPackageTotals(duration, cost, budget) {
+        document.getElementById('totalDuration').textContent = `${duration} days`;
+        document.getElementById('totalCost').textContent = `$${cost.toFixed(2)}`;
+        document.getElementById('totalBudget').textContent = `$${budget.toFixed(2)}`;
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure proper sizing for the planning container
+        const container = document.getElementById('planningContent');
+        if (container) {
+            // If the page is in an iframe or embedded context, adjust sizing
+            if (window !== window.parent) {
+                container.style.width = '100%';
+                container.style.minHeight = '600px';
+                document.body.style.overflow = 'auto';
+                document.body.style.height = '100%';
+                document.body.style.width = '100%';
+            }
+        }
+
+        // Load data from the backend when the page loads
+        loadProjectData();
+
+        // Add window resize handler to ensure content remains properly sized
+        window.addEventListener('resize', function() {
+            checkContentSize();
+        });
+    });
+
+    // Authentication check placeholder (uncomment and implement when ready)
+    // document.addEventListener('DOMContentLoaded', function() {
+    //    const token = localStorage.getItem("access_token");
+    //    if (!token) {
+    //        window.location.href = "login.html"; // Redirect to login if not authenticated
+    //    } else {
+    //        loadProjectData(); // Load data only if authenticated
+    //    }
+    // });
+
+</script>
+</body>
+</html>
+

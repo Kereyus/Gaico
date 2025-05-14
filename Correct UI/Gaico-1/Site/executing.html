@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management - GAICO</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+  <title>Initiating Phase</title>
+</head>
+<body>
+    
+<header class="navbar">
+  <a href="index.html" class="logo-container">
+    <img src="assets/logo.png" alt="Logo" class="logo-img" />
+  </a>
+  <div class="top-navbar">
+    <div class="top-left">
+      <input
+        type="text"
+        class="search-bar"
+        placeholder="Search…"
+        aria-label="Search projects"
+      />
+    </div>
+    <div class="top-right" id="auth-control">
+    </div>
+  </div>
+  <div class="bottom-navbar">
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="projectlisting.html">
+        <img src="assets/projects.png" alt="" class="icon" />
+        <span class="link-text">Home</span>
+      </a>
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="" class="icon" />
+        <span class="link-text">Dashboard</span>
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="" class="icon" />
+        <span class="link-text">Timeline</span>
+      </a>
+      <a href="projects.html">
+        <img src="assets/create.png" alt="" class="icon" />
+        <span class="link-text">New Project</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+    <div class="planning-content">
+        <div class="activities-container">
+            <div class="section-header">
+                <h3>Project Activities</h3>
+            </div>
+
+            <div class="section-content" id="activitiesSection">
+                <h4>Existing Activities:</h4>
+                <div class="activities-list" id="activitiesList">
+                    <p>Loading activities...</p>
+                    </div>
+            </div>
+        </div>
+
+        <div class="work-packages-container" id="workPackagesSection" style="display:none;">
+            <div class="section-header">
+                <h3 id="selectedActivityTitle">Work Packages</h3>
+                <button class="btn btn-primary" onclick="exportToCSV()">Export to CSV</button>
+            </div>
+
+            <div class="section-content">
+                <div id="workpackage-placeholder" style="display: none; margin-bottom: 15px; color: #666;">
+                    Select an activity above to view or add its work packages.
+                </div>
+
+                <button class="btn btn-primary btn-add-workpackage" onclick="showWorkPackageForm()">
+                    + Add Work Package
+                </button>
+
+                <div class="form-container workpackage-form" id="workPackageForm" style="display:none;">
+                    <form id="addWorkPackageForm" onsubmit="event.preventDefault(); saveWorkPackage();">
+                      <fieldset>
+                        <legend id="wp-form-legend">Add New Work Package</legend>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="workPackageName">Work Package Name *</label>
+                                <input type="text" id="workPackageName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="workPackageDuration">Duration (days) *</label>
+                                <input type="number" id="workPackageDuration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="workPackageCost">Estimated Cost ($)</label>
+                                <input type="number" id="workPackageCost" min="0" step="0.01" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="workPackageBudget">Budget ($)</label>
+                                <input type="number" id="workPackageBudget" min="0" step="0.01" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="workPackageFiles">Upload Files</label>
+                                <input type="file" id="workPackageFiles" multiple>
+                            </div>
+                        </div>
+
+                        <div id="wp-error" class="error-message"></div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideWorkPackageForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="saveWorkPackageBtn">Save Package</button>
+                        </div>
+                      </fieldset>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <table class="workpackage-table">
+                        <thead>
+                            <tr>
+                                <th>Work Package</th>
+                                <th>Duration</th>
+                                <th>Est. Cost</th>
+                                <th>Budget</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workPackagesList">
+                           <tr><td colspan="5" id="wp-list-placeholder">Select an activity or add work packages.</td></tr>
+                           </tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td><strong>Totals:</strong></td>
+                                <td id="totalDuration">0 days</td>
+                                <td id="totalCost">$0.00</td>
+                                <td id="totalBudget">$0.00</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //Authentication check
+      //const token = localStorage.getItem("access_token");
+      //  if (!token) window.location.href = "login.html";
+
+        // --- Global variable to store the currently selected activity ---
+        let selectedActivityId = null;
+
+        // --- IMPORTANT: Replace with your actual backend API base URL ---
+        const API_BASE_URL = 'YOUR_BACKEND_API_URL'; // e.g., 'http://localhost:5000/api'
+
+        // --- Helper function to get project ID from URL ---
+        function getProjectIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get("id"); // Get the 'id' parameter from the URL
+        }
+
+
+        // --- Function to fetch and display activities ---
+        async function loadActivities() {
+            const activityList = document.getElementById('activitiesList');
+            activityList.innerHTML = '<p>Loading activities...</p>'; // Show loading state
+
+            // --- Get the project ID from the URL ---
+            const projectId = getProjectIdFromUrl();
+
+            if (!projectId) {
+                activityList.innerHTML = '<p>Project ID not found in URL.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/projects/${projectId}/activities`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Include the auth token
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    // Handle non-200 responses (e.g., 401 Unauthorized, 404 Not Found)
+                    const error = await response.json();
+                    activityList.innerHTML = `<p>Error loading activities: ${error.message || response.statusText}</p>`;
+                    return;
+                }
+
+                const activities = await response.json(); // Assuming backend returns JSON array of activities
+
+                if (activities.length === 0) {
+                    activityList.innerHTML = '<p>No activities found for this project.</p>';
+                    return;
+                }
+
+                // Render activities
+                activityList.innerHTML = activities.map(activity => `
+                    <div class="activity-item">
+                        <span>${activity.name}</span>
+                        <button class="btn btn-link" onclick="viewWorkPackages('${activity.id}', '${activity.name}')">View Work Packages</button>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error fetching activities:', error);
+                activityList.innerHTML = '<p>An error occurred while loading activities.</p>';
+            }
+        }
+
+
+        // --- Function to fetch and display work packages for a selected activity ---
+        async function viewWorkPackages(activityId, activityName) {
+            selectedActivityId = activityId; // Store the selected activity ID
+            document.getElementById('workPackagesSection').style.display = 'block';
+            document.getElementById('selectedActivityTitle').textContent = `${activityName} Work Packages`;
+            const wpList = document.getElementById('workPackagesList');
+            const wpListPlaceholder = document.getElementById('wp-list-placeholder');
+            wpList.innerHTML = ''; // Clear previous work packages
+            wpListPlaceholder.style.display = 'table-row'; // Show placeholder initially
+            wpListPlaceholder.innerHTML = '<td colspan="5">Loading work packages...</td>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/activities/${activityId}/workpackages`, {
+                     headers: {
+                        'Authorization': `Bearer ${token}`, // Include the auth token
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                     const error = await response.json();
+                     wpListPlaceholder.innerHTML = `<td colspan="5">Error loading work packages: ${error.message || response.statusText}</td>`;
+                     updateTotals([]); // Update totals to 0 on error
+                     return;
+                }
+
+                const workPackages = await response.json(); // Assuming backend returns JSON array of work packages
+
+                wpListPlaceholder.style.display = 'none'; // Hide placeholder if data loaded
+
+                if (workPackages.length === 0) {
+                    wpList.innerHTML = '<tr><td colspan="5">No work packages found for this activity.</td></tr>';
+                    updateTotals([]); // Update totals to 0 if no work packages
+                } else {
+                    wpList.innerHTML = workPackages.map(wp => `
+                        <tr>
+                            <td>${wp.name}</td>
+                            <td>${wp.duration} days</td>
+                            <td>$${parseFloat(wp.cost).toFixed(2)}</td>
+                            <td>$${parseFloat(wp.budget).toFixed(2)}</td>
+                            <td>
+                                <button class="btn btn-link" onclick="editWorkPackage('${wp.id}')">Edit</button>
+                                <button class="btn btn-link text-danger" onclick="deleteWorkPackage('${wp.id}', '${activityId}', '${activityName}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    updateTotals(workPackages); // Calculate and display totals
+                }
+
+            } catch (error) {
+                console.error('Error fetching work packages:', error);
+                wpListPlaceholder.innerHTML = '<td colspan="5">An error occurred while loading work packages.</td>';
+                updateTotals([]); // Update totals to 0 on error
+            }
+        }
+
+        // --- Function to show work package form ---
+        function showWorkPackageForm(workPackage = null) {
+            const form = document.getElementById('addWorkPackageForm');
+            document.getElementById('workPackageForm').style.display = 'block';
+            document.getElementById('wp-error').textContent = ''; // Clear previous errors
+
+            if (workPackage) {
+                 // --- Populate form for editing (Requires fetching single work package data) ---
+                 document.getElementById('wp-form-legend').textContent = 'Edit Work Package';
+                 document.getElementById('workPackageName').value = workPackage.name;
+                 document.getElementById('workPackageDuration').value = workPackage.duration;
+                 document.getElementById('workPackageCost').value = workPackage.cost;
+                 document.getElementById('workPackageBudget').value = workPackage.budget;
+                 // Note: File inputs cannot be pre-filled for security reasons.
+                 // You might need to show existing file links and allow new uploads.
+                 document.getElementById('saveWorkPackageBtn').textContent = 'Update Package';
+                 form.dataset.editingId = workPackage.id; // Store ID for update
+            } else {
+                // --- Reset form for adding new work package ---
+                document.getElementById('wp-form-legend').textContent = 'Add New Work Package';
+                form.reset();
+                document.getElementById('saveWorkPackageBtn').textContent = 'Save Package';
+                delete form.dataset.editingId; // Remove editing ID
+            }
+        }
+
+        // --- Function to hide work package form ---
+        function hideWorkPackageForm() {
+            document.getElementById('workPackageForm').style.display = 'none';
+             // Clear form and any editing state when hiding
+            document.getElementById('addWorkPackageForm').reset();
+            delete document.getElementById('addWorkPackageForm').dataset.editingId;
+        }
+
+        // --- Function to save or update a Work Package ---
+        async function saveWorkPackage() {
+            const form = document.getElementById('addWorkPackageForm');
+            const wpError = document.getElementById('wp-error');
+            wpError.textContent = ''; // Clear previous errors
+
+            const workPackageName = document.getElementById('workPackageName').value;
+            const workPackageDuration = document.getElementById('workPackageDuration').value;
+            const workPackageCost = document.getElementById('workPackageCost').value;
+            const workPackageBudget = document.getElementById('workPackageBudget').value;
+            const files = document.getElementById('workPackageFiles').files;
+            const editingId = form.dataset.editingId; // Get ID if editing
+
+            if (!selectedActivityId && !editingId) {
+                wpError.textContent = 'Error: No activity selected or work package being edited.';
+                return;
+            }
+
+            // --- Use FormData for handling file uploads ---
+            const formData = new FormData();
+            formData.append('name', workPackageName);
+            formData.append('duration', workPackageDuration);
+            formData.append('cost', workPackageCost);
+            formData.append('budget', workPackageBudget);
+             // If creating, the backend will need the activity ID
+             if (!editingId) {
+                 formData.append('activityId', selectedActivityId);
+             }
+
+
+            // Append files to FormData
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            let url = '';
+            let method = '';
+
+            if (editingId) {
+                 // --- Update existing work package ---
+                url = `${API_BASE_URL}/workpackages/${editingId}`;
+                method = 'PUT'; // Or PATCH, depending on your API design
+                // Note: PUT/PATCH with files and other data can be tricky.
+                // Your backend might need a specific endpoint for updating with files,
+                // or you might update work package data and upload files separately.
+                // This example assumes a backend that can handle mixed data/file updates.
+            } else {
+                // --- Create new work package ---
+                url = `${API_BASE_URL}/workpackages`; // Assuming a general work packages endpoint for POST
+                method = 'POST';
+                // The activityId is already added to formData above
+            }
+
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Include the auth token
+                        // Do NOT set 'Content-Type': 'application/json' when using FormData
+                        // The browser sets the correct 'Content-Type: multipart/form-data' header automatically
+                    },
+                    body: formData // Send the FormData object
+                });
+
+                const result = await response.json(); // Assuming backend returns JSON result
+
+                if (!response.ok) {
+                    // Handle backend errors
+                     wpError.textContent = `Error saving work package: ${result.message || response.statusText}`;
+                    return;
+                }
+
+                // --- Success ---
+                console.log('Work Package saved successfully:', result);
+                hideWorkPackageForm(); // Hide the form
+                // Reload the work packages list for the current activity to show the changes
+                if (selectedActivityId) {
+                    // You might need the activity name again, or refetch activities if names can change
+                    // For simplicity, let's refetch based on ID and hope the name is consistent or fetched
+                    const activityItem = document.querySelector(`.activity-item button[onclick*='${selectedActivityId}']`);
+                    const activityName = activityItem ? activityItem.parentElement.querySelector('span').textContent : 'Selected Activity';
+                     viewWorkPackages(selectedActivityId, activityName);
+                }
+
+
+            } catch (error) {
+                console.error('Error saving work package:', error);
+                wpError.textContent = 'An error occurred while saving the work package.';
+            }
+        }
+
+        // --- Function to handle editing a work package ---
+        // This will likely need to fetch the specific work package's data first
+        async function editWorkPackage(workPackageId) {
+            // Fetch the specific work package data from the backend
+            try {
+                const response = await fetch(`${API_BASE_URL}/workpackages/${workPackageId}`, {
+                     headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Error fetching work package for editing:', error);
+                    alert(`Error fetching work package: ${error.message || response.statusText}`);
+                    return;
+                }
+
+                const workPackage = await response.json();
+                showWorkPackageForm(workPackage); // Pass the fetched data to the form
+            } catch (error) {
+                 console.error('Error fetching work package for editing:', error);
+                 alert('An error occurred while fetching work package details.');
+            }
+        }
+
+        // --- Function to handle deleting a work package ---
+        async function deleteWorkPackage(workPackageId, activityId, activityName) {
+            if (!confirm('Are you sure you want to delete this work package?')) {
+                return; // User cancelled
+            }
+
+            try {
+                 const response = await fetch(`${API_BASE_URL}/workpackages/${workPackageId}`, {
+                     method: 'DELETE',
+                     headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                 if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Error deleting work package:', error);
+                    alert(`Error deleting work package: ${error.message || response.statusText}`);
+                    return;
+                }
+
+                console.log('Work Package deleted successfully.');
+                // Reload the work packages list for the current activity
+                viewWorkPackages(activityId, activityName);
+
+            } catch (error) {
+                console.error('Error deleting work package:', error);
+                alert('An error occurred while deleting the work package.');
+            }
+        }
+
+
+        // --- Function to calculate and update totals ---
+        function updateTotals(workPackages) {
+            const totalDuration = workPackages.reduce((sum, wp) => sum + parseInt(wp.duration || 0), 0);
+            const totalCost = workPackages.reduce((sum, wp) => sum + parseFloat(wp.cost || 0), 0);
+            const totalBudget = workPackages.reduce((sum, wp) => sum + parseFloat(wp.budget || 0), 0);
+
+            document.getElementById('totalDuration').textContent = `${totalDuration} days`;
+            document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
+            document.getElementById('totalBudget').textContent = `$${totalBudget.toFixed(2)}`;
+        }
+
+        // --- Export to CSV Function (Needs backend data retrieval) ---
+         function exportToCSV() {
+             // --- Option 2 (Recommended): Call a backend endpoint for export ---
+             const projectId = getProjectIdFromUrl(); // Get the current project ID
+             if (!projectId) {
+                 alert('Cannot export: Project ID not found.');
+                 return;
+             }
+
+             // Assuming your backend has an endpoint like /api/projects/{projectId}/export/csv
+             const exportUrl = `${API_BASE_URL}/projects/${projectId}/export/csv`;
+
+             // You might need to make an authenticated request to this endpoint
+             fetch(exportUrl, {
+                 headers: {
+                     'Authorization': `Bearer ${token}`
+                 }
+             })
+             .then(response => {
+                 if (!response.ok) {
+                     throw new Error(`HTTP error! status: ${response.status}`);
+                 }
+                 // Assuming the backend sends the CSV file directly as the response body
+                 return response.blob(); // Get the response as a Blob
+             })
+             .then(blob => {
+                 // Create a link element to trigger the download
+                 const url = window.URL.createObjectURL(blob);
+                 const a = document.createElement('a');
+                 a.style.display = 'none';
+                 a.href = url;
+                 a.download = 'project_execution_data.csv'; // Set the desired file name
+                 document.body.appendChild(a);
+                 a.click();
+                 window.URL.revokeObjectURL(url); // Clean up the object URL
+             })
+             .catch(error => {
+                 console.error('Error during CSV export:', error);
+                 alert('An error occurred during CSV export.');
+             });
+        }
+
+
+        // --- Initialize: Load activities when the page loads ---
+        document.addEventListener('DOMContentLoaded', loadActivities);
+
+    </script>
+
+</body>
+</html>

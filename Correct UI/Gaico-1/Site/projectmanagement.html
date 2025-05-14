@@ -1,0 +1,1392 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management - GAICO</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kameron:wght@400;700&display=swap" rel="stylesheet">
+  
+</head>
+<body> <!--
+  <script> 
+    // Authentication check
+    const token = localStorage.getItem("access_token");
+    if (!token) window.location.href = "login.html";
+  </script> -->
+
+<header class="navbar">
+  <a href="index.html" class="logo-container">
+    <img src="assets/logo.png" alt="Logo" class="logo-img" />
+  </a>
+  <div class="top-navbar">
+    <div class="top-left">
+      <input
+        type="text"
+        class="search-bar"
+        placeholder="Search…"
+        aria-label="Search projects"
+      />
+    </div>
+    <div class="top-right" id="auth-control">
+    </div>
+  </div>
+  <div class="bottom-navbar">
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="projectlisting.html">
+        <img src="assets/projects.png" alt="" class="icon" />
+        <span class="link-text">Home</span>
+      </a>
+      <a href="dashboard.html">
+        <img src="assets/dashboard.png" alt="" class="icon" />
+        <span class="link-text">Dashboard</span>
+      </a>
+      <a href="timeline.html">
+        <img src="assets/timeline.png" alt="" class="icon" />
+        <span class="link-text">Timeline</span>
+      </a>
+      <a href="projects.html">
+        <img src="assets/create.png" alt="" class="icon" />
+        <span class="link-text">New Project</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+
+  <div class="project-management-container">
+    <aside class="project-phases">
+      <h3>Project Phases</h3>
+      <nav class="phase-nav">
+        <a href="#" class="phase-link active" data-phase="initiating">
+          <span class="phase-number">1</span>
+          Initiating
+        </a>
+        <a href="#" class="phase-link" data-phase="planning">
+          <span class="phase-number">2</span>
+          Planning
+        </a>
+        <a href="#" class="phase-link" data-phase="executing">
+          <span class="phase-number">3</span>
+          Executing
+        </a>
+
+        <a href="#" class="phase-link" data-phase="closing">
+          <span class="phase-number">5</span>
+          Closing
+        </a>
+      </nav>
+
+      <div class="project-info">
+        <h4>Project Details</h4>
+        <div id="projectDetails">
+          <p>Loading project details...</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="phase-content" id="phaseContent">
+      <div class="phase-header">
+        <h2 id="currentPhaseTitle">Loading...</h2>
+      </div>
+
+      <div id="dynamicContent">
+        <p>Loading content...</p>
+      </div>
+    </main>
+  </div>
+  <script>
+    // Define the API base URL (change this to your actual backend URL)
+    const API_BASE_URL = 'http://localhost:8081';
+
+    // Get project ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get("id");
+
+    // Variable to track if a charter already exists for this project
+    let charterExists = false; // Initialize to false
+
+    if (!projectId) {
+        alert('No project specified');
+        window.location.href = 'projects.html';
+    }
+
+    // Load project data and initial phase content
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadProjectData();
+        // Only load initiating content if project data loaded successfully
+        // Check if projectDetails has content other than error messages
+        const projectDetailsDiv = document.getElementById('projectDetails');
+        const hasProjectDetails = projectDetailsDiv && projectDetailsDiv.innerHTML.trim() !== '' &&
+                                   !projectDetailsDiv.innerHTML.includes('Project not found') &&
+                                   !projectDetailsDiv.innerHTML.includes('Error loading');
+
+        if (hasProjectDetails) {
+             loadPhaseContent('initiating'); // This will also load charter/stakeholders
+        } else {
+            // Project load failed or project not found, ensure charter/stakeholder sections are handled
+            // The loadInitiatingContent will add specific messages if project details failed
+            // Or you could add a message here indicating project details are required first
+            document.getElementById('dynamicContent').innerHTML = '<p class="error">Cannot load phase content without successful project details.</p>';
+        }
+
+
+        // Set up phase navigation (even if project data failed, navigation might still be desired)
+        setupPhaseNavigation();
+    });
+
+    /*
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadProjectData();
+  
+      const projectDetailsDiv = document.getElementById('projectDetails');
+      const hasProjectDetails = projectDetailsDiv && projectDetailsDiv.innerHTML.trim() !== '' &&
+          !projectDetailsDiv.innerHTML.includes('Project not found') &&
+          !projectDetailsDiv.innerHTML.includes('Error loading');
+  
+      if (hasProjectDetails) {
+          loadPhaseContent('initiating'); // Start with initiating by default
+      } else {
+          document.getElementById('dynamicContent').innerHTML =
+              '<p class="error">Cannot load phase content without successful project details.</p>';
+      }
+  
+      setupPhaseNavigation();
+  });
+  */
+  
+
+    // Set up phase navigation click handlers
+    function setupPhaseNavigation() {
+        const phaseLinks = document.querySelectorAll('.phase-link');
+
+        phaseLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Update active state
+                phaseLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // Get the data-phase attribute
+                const phase = this.dataset.phase;
+
+                // Navigate to the corresponding HTML page, passing projectId
+                if (phase !== 'initiating') { // Redirect for phases other than initiating
+                    window.location.href = `${phase}.html?id=${projectId}`;
+                } else {
+                    // For initiating, reload/update content on the current page
+                    // We might not need to fully reload, but re-rendering content based on current data
+                    // or re-fetching could be an option if needed. For now, just ensure the section is visible/updated.
+                    // Given the structure, loadPhaseContent('initiating') re-renders, which is fine.
+                     loadPhaseContent('initiating');
+                }
+            });
+        });
+    }/*
+
+    function setupPhaseNavigation() {
+      const phaseLinks = document.querySelectorAll('.phase-link');
+  
+      phaseLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+              e.preventDefault();
+  
+              // Update active state
+              phaseLinks.forEach(l => l.classList.remove('active'));
+              this.classList.add('active');
+  
+              // Get the data-phase attribute
+              const phase = this.dataset.phase;
+  
+              // Load the content dynamically
+              loadPhaseContent(phase);
+          });
+      });
+  }
+      */
+
+
+    // Load content for a specific phase - simplified to only load initiating content on this page
+    async function loadPhaseContent(phase) {
+        if (phase !== 'initiating') return; // Only handle initiating on this page
+
+        try {
+            document.getElementById('currentPhaseTitle').textContent = 'Initiating Phase';
+            document.getElementById('dynamicContent').innerHTML = '<p>Loading initiating phase data...</p>';
+            await loadInitiatingContent(); // This function now sets charterExists and loads stakeholders
+        } catch (error) {
+            console.error('Error loading initiating phase content:', error);
+            // loadInitiatingContent now handles 404s gracefully for specific data,
+            // this catch is for broader issues during the loading process itself.
+            document.getElementById('dynamicContent').innerHTML =
+                `<p class="error">An unexpected error occurred while loading initiating phase content: ${error.message}. Please try again.</p>`;
+        }
+    }
+
+
+async function loadPhaseContent(phase) {
+  const phaseTitleMap = {
+      initiating: "Initiating Phase",
+      planning: "Planning Phase",
+      executing: "Executing Phase",
+      closing: "Closing Phase"
+  };
+  // for loading the planning phase 
+
+  async function loadPlanningContent() {
+    try {
+        const response = await fetch('planning.html');
+        const content = await response.text();
+        document.getElementById('dynamicContent').innerHTML = content;
+        executeScriptsInContent(content);
+    } catch (error) {
+        document.getElementById('dynamicContent').innerHTML =
+            `<p class="error">Error loading Planning Phase content: ${error.message}</p>`;
+    }
+}
+
+async function loadExecutingContent() {
+    try {
+        const response = await fetch('executing.html');
+        const content = await response.text();
+        document.getElementById('dynamicContent').innerHTML = content;
+        executeScriptsInContent(content);
+    } catch (error) {
+        document.getElementById('dynamicContent').innerHTML =
+            `<p class="error">Error loading Executing Phase content: ${error.message}</p>`;
+    }
+}
+
+async function loadClosingContent() {
+    try {
+        const response = await fetch('closing.html');
+        const content = await response.text();
+        document.getElementById('dynamicContent').innerHTML = content;
+        executeScriptsInContent(content);
+    } catch (error) {
+        document.getElementById('dynamicContent').innerHTML =
+            `<p class="error">Error loading Closing Phase content: ${error.message}</p>`;
+    }
+}
+
+function executeScriptsInContent(content) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = content;
+  const scripts = tempDiv.querySelectorAll('script');
+
+  scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      [...oldScript.attributes].forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+      });
+      if (!oldScript.src) {
+          newScript.textContent = oldScript.textContent;
+      }
+      document.body.appendChild(newScript);
+  });
+}
+
+
+  try {
+      // Update the header
+      document.getElementById('currentPhaseTitle').textContent = phaseTitleMap[phase] || "Project Phase";
+      document.getElementById('dynamicContent').innerHTML = `<p>Loading ${phase} phase data...</p>`;
+
+      // Load appropriate content based on phase
+      switch (phase) {
+          case 'initiating':
+              await loadInitiatingContent();
+              break;
+          case 'planning':
+              await loadPlanningContent();  // Implement this
+              break;
+          case 'executing':
+              await loadExecutingContent(); // Implement this
+              break;
+          case 'closing':
+              await loadClosingContent();   // Implement this
+              break;
+          default:
+              document.getElementById('dynamicContent').innerHTML = `<p class="error">Unknown phase: ${phase}</p>`;
+      }
+  } catch (error) {
+      console.error(`Error loading ${phase} phase content:`, error);
+      document.getElementById('dynamicContent').innerHTML =
+          `<p class="error">An unexpected error occurred while loading ${phase} phase content: ${error.message}. Please try again.</p>`;
+  }
+}
+
+// Function to handle phase transitions
+function loadNewPhase(phaseId) {
+  // First, remove the previous phase's styling
+  document.querySelectorAll('.phase-styles').forEach(styleElement => {
+    styleElement.disabled = true;
+    styleElement.remove();
+  });
+  
+  // Clear any inline styles that might be affecting containers
+  document.querySelectorAll('.phase-container').forEach(container => {
+    container.style.display = 'none';
+  });
+  
+  // Load and apply new phase's styling
+  const newStylesheet = document.createElement('link');
+  newStylesheet.rel = 'stylesheet';
+  newStylesheet.href = `css/phase-${phaseId}.css`;
+  newStylesheet.className = 'phase-styles';
+  document.head.appendChild(newStylesheet);
+  
+  // Show only the current phase container
+  const currentContainer = document.getElementById(`phase-${phaseId}-container`);
+  if (currentContainer) {
+    currentContainer.style.display = 'block';
+  }
+}
+    // Fetch data from the backend - returns null on 404
+    // Added options for method and body
+    async function fetchFromBackend(endpoint, options = {}) {
+        try {
+            const token = localStorage.getItem('access_token');
+
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                ...(options.headers || {}) // Merge additional headers if any
+            };
+
+             // Add Content-Type for requests with a body, unless explicitly set
+             if (options.body && !headers['Content-Type']) {
+                 headers['Content-Type'] = 'application/json';
+             }
+
+
+            const response = await fetch(`${API_BASE_URL}/api/stakeholders/project/${projectId}`, {
+                ...options,
+                headers: headers
+            });
+
+            if (!response.ok) {
+                // If 404, return null, otherwise throw error
+                if (response.status === 404) {
+                    console.warn(`Resource not found at ${endpoint}`, response); // Log 404s as warnings
+                    return null;
+                }
+                // Throw error for other non-ok statuses
+                const errorBody = await response.text(); // Try to get error body
+                throw new Error(`API error: ${response.status} ${response.statusText} - ${errorBody}`);
+            }
+
+            // Handle 204 No Content specifically (e.g., successful deletion)
+            if (response.status === 204) {
+                return {}; // Return an empty object or null to signify success with no content
+            }
+
+            // Parse JSON for other successful responses (200, 201 etc.)
+            // Check if response has content before trying to parse JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                 return await response.json();
+            } else {
+                 // If no JSON content is expected (e.g., success response with no body), return response object
+                 return response;
+            }
+
+
+        } catch (error) {
+            console.error('API request failed:', error);
+            // Re-throw the error for the caller to handle
+            throw error;
+        }
+    }
+
+    // Load project data from backend
+    async function loadProjectData() {
+        try {
+            const project = await fetchFromBackend(`/api/projects/${projectId}`);
+
+            if (!project) { // Handle case if project ID itself doesn't exist (404 on /projects/{id})
+                document.getElementById('projectDetails').innerHTML = `
+                    <p class="error">Project not found.</p>
+                `;
+                document.getElementById('dynamicContent').innerHTML = `
+                    <p class="error">Could not load project details for this project ID.</p>
+                `;
+                // Disable relevant interactions if project not found
+                disablePhaseNavigation(); // Helper function needed for this
+                return; // Stop execution if project not found
+            }
+
+            document.getElementById('projectDetails').innerHTML = `
+                <p><strong>${project.name || 'Unnamed Project'}</strong></p>
+                <p>Manager: ${project.managerName || 'Not assigned'}</p>
+                <p>Status: <span class="status-${(project.status || 'pending').toLowerCase().replace(' ', '-')}">${project.status || 'Pending'}</span></p>
+            `;
+        } catch (error) {
+            console.error('Error loading project:', error);
+            document.getElementById('projectDetails').innerHTML = `
+                <p class="error">Error loading project details: ${error.message}</p>
+            `;
+            document.getElementById('dynamicContent').innerHTML = `
+                <p class="error">Could not load project details: ${error.message}</p>
+            `;
+             disablePhaseNavigation(); // Disable if project loading fails critically
+        }
+    }
+
+    // Helper function to disable phase navigation links
+    function disablePhaseNavigation() {
+        const phaseLinks = document.querySelectorAll('.phase-link');
+        phaseLinks.forEach(link => {
+            link.style.pointerEvents = 'none'; // Visually indicate disabled
+            link.style.opacity = '0.5';
+        });
+    }
+
+
+    // --- Helper function to create HTML for a single stakeholder row
+    function createStakeholderRowHtml(stakeholder, isApproved) {
+        const stakeholderId = stakeholder.id; // Will be undefined for a new row being added inline
+        const isNewRow = !stakeholderId; // Flag for new rows
+        const rowClass = isNewRow ? 'new-stakeholder-row' : '';
+
+        // If this is a new row being added (no id), create it in edit mode directly
+        if (isNewRow) {
+            return `
+                <tr data-id="" class="${rowClass} editing">
+                    <td data-field="name"><input type="text" value="${stakeholder.name || ''}" placeholder="Name" required></td>
+                    <td data-field="role"><input type="text" value="${stakeholder.role || ''}" placeholder="Role"></td>
+                    <td data-field="contact"><input type="text" value="${stakeholder.contact || ''}" placeholder="Contact"></td>
+                    <td data-field="influence"><input type="text" value="${stakeholder.influence || 'Low'}" placeholder="Influence"></td>
+                    <td class="actions">
+                        <button type="button" class="action-btn save">Save</button>
+                        <button type="button" class="action-btn cancel">Cancel</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // For existing stakeholders, create in view mode
+        const actionBtnsHtml = isApproved ?
+            `` :
+            `<button type="button" class="action-btn edit" data-id="${stakeholderId}">Edit</button>
+             <button type="button" class="action-btn delete" data-id="${stakeholderId}">Remove</button>`;
+
+        return `
+            <tr data-id="${stakeholderId}" class="${rowClass}">
+                <td data-field="name">${stakeholder.name || ''}</td>
+                <td data-field="role">${stakeholder.role || ''}</td>
+                <td data-field="contact">${stakeholder.contact || ''}</td>
+                <td data-field="influence" data-value="${stakeholder.influence || 'Low'}">${stakeholder.influence || 'Low'}</td>
+                <td class="actions">${actionBtnsHtml}</td>
+            </tr>
+        `;
+    }
+
+    // Load initiating phase content from backend (loads charter and stakeholders)
+    async function loadInitiatingContent() {
+        // Initialize with empty default values matching the new form fields
+        let initiatingData = {
+            charter: {
+                projectname: '',
+                sponsors: '',
+                objective: '',
+                description: '',
+                deliverables: '',
+                approved: false // Default to not approved
+            }
+        };
+        let stakeholders = [];
+        let loadErrors = []; // To track non-404 errors
+
+        // --- Fetch Charter Data ---
+        try {
+            // Attempt to fetch initiating phase data (includes charter usually)
+            // fetchFromBackend will return null on 404 now
+            const fetchedCharterData = await fetchFromBackend(`/api/charter/${projectId}`);
+            if (fetchedCharterData) {
+                // Merge fetched data, keeping defaults for properties not present
+                initiatingData.charter = { ...initiatingData.charter, ...fetchedCharterData }; // Assuming /api/charter/{id} returns the charter object directly
+                charterExists = true; // Set flag as charter data was loaded
+                console.log('Charter data loaded:', initiatingData.charter);
+            } else {
+                charterExists = false; // No charter found
+                console.warn('Initiating phase data (charter) not found for project', projectId, '- ready for entry.');
+                // initiatingData.charter remains the default empty object + approved: false
+            }
+        } catch (error) {
+            // Handle errors other than 404 during initiating data fetch
+            console.error('Error fetching initiating phase data (non-404):', error);
+            loadErrors.push(`Failed to load charter data: ${error.message}`);
+        }
+
+        // --- Fetch Stakeholder Data ---
+        try {
+            // fetchFromBackend will return null on 404 now
+            const fetchedStakeholders = await fetchFromBackend(`/api/projects/${projectId}/stakeholders`);
+            if (fetchedStakeholders) {
+                // Assuming the backend returns an array of stakeholders
+                if (Array.isArray(fetchedStakeholders)) {
+                    stakeholders = fetchedStakeholders; // Use fetched data if found and is array
+                    console.log('Stakeholders loaded:', stakeholders);
+                } else {
+                    console.error('API returned non-array for stakeholders:', fetchedStakeholders);
+                    loadErrors.push('Failed to load stakeholders: Unexpected data format.');
+                }
+            } else {
+                console.warn('Stakeholder data not found for project', projectId, '- ready for entry.');
+                // stakeholders remains the default empty array []
+            }
+        } catch (error) {
+            // Handle errors other than 404 during stakeholders fetch
+            console.error('Error fetching stakeholders (non-404):', error);
+            loadErrors.push(`Failed to load stakeholders: ${error.message}`);
+        }
+
+        // --- Rendering Logic ---
+
+        // Determine if charter is approved (default to false if no charter data or not approved)
+        const isApproved = initiatingData.charter.approved || false;
+        const approvedClass = isApproved ? 'approved' : '';
+        const approvedBannerStyle = isApproved ? 'display: block;' : 'display: none;'; // Ensure it's hidden if not approved
+
+        // Determine initial readonly state for charter fields
+        // Fields are readonly if charter is approved or if a charter exists but is not approved (requiring 'Edit')
+        // If no charter exists, fields should be editable initially to allow creation.
+        const initialReadonlyState = charterExists && !isApproved;
+
+
+        // Build stakeholder table body HTML
+        let stakeholderRowsHtml = '';
+
+        // Add existing stakeholders (fetched data)
+        if (stakeholders && stakeholders.length > 0) {
+            stakeholders.forEach(stakeholder => {
+                stakeholderRowsHtml += createStakeholderRowHtml(stakeholder, isApproved);
+            });
+        } else {
+            // Add "No stakeholders" message when table is empty
+            // The message row will be removed when "Add Stakeholder" is clicked
+            stakeholderRowsHtml = `
+                <tr id="no-stakeholders-row">
+                    <td colspan="5" class="no-data">
+                        ${isApproved ?
+                          'No stakeholders were added.' :
+                          'No stakeholders added yet. Click "Add Stakeholder" below.'}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Display any non-404 loading errors
+        let errorMessagesHtml = '';
+        if (loadErrors.length > 0) {
+            errorMessagesHtml = `<p class="error">Loading Errors: ${loadErrors.join('<br>')}</p>`;
+        }
+
+        // Update the dynamic content with the fetched or default data
+        document.getElementById('dynamicContent').innerHTML = `
+            ${errorMessagesHtml} <div class="initiating-content">
+                <section class="project-charter">
+                    <h3>Project Charter</h3>
+                    <div class="approved-banner" style="${approvedBannerStyle}">
+                        <strong>Charter Approved</strong> - No further edits are allowed
+                    </div>
+                    <form id="charterForm" class="charter-form ${approvedClass}">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="charterTitle">Name <span class="required">*</span></label>
+                                <input type="text" id="charterTitle" value="${initiatingData.charter.projectname}" ${initialReadonlyState ? 'readonly' : ''} required aria-required="true">
+                            </div>
+                            <div class="form-group">
+                                <label for="charterSponsors">Sponsors <span class="required">*</span></label>
+                                <input type="text" id="charterSponsors" value="${initiatingData.charter.sponsors}" ${initialReadonlyState ? 'readonly' : ''} required aria-required="true">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charterObjective">Objective <span class="required">*</span></label>
+                            <textarea id="charterObjective" rows="3" ${initialReadonlyState ? 'readonly' : ''} required aria-required="true">${initiatingData.charter.objective}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charterDescription">Description <span class="required">*</span></label>
+                            <textarea id="charterDescription" rows="5" ${initialReadonlyState ? 'readonly' : ''} required aria-required="true">${initiatingData.charter.description}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="charterDeliverables">Deliverables <span class="required">*</span></label>
+                            <textarea id="charterDeliverables" rows="3" ${initialReadonlyState ? 'readonly' : ''} required aria-required="true"
+                                placeholder="List key deliverables separated by commas">${initiatingData.charter.deliverables}</textarea>
+                        </div>
+
+                        <div class="charter-actions">
+                            <button type="button" class="edit-btn" ${isApproved ? 'disabled' : ''}>${initialReadonlyState ? 'Edit Charter' : 'Save Charter'}</button>
+                            <button type="button" class="btn-approve" ${isApproved ? 'disabled' : ''}>Approve Charter</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="stakeholders">
+                    <h3>Stakeholders</h3>
+                    <table class="stakeholder-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Contact</th>
+                                <th>Influence</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stakeholdersTableBody">
+                            ${stakeholderRowsHtml}
+                        </tbody>
+                    </table>
+                    <button type="button" class="add-stakeholder-btn" ${isApproved ? 'disabled' : ''}>Add Stakeholder</button>
+                </section>
+            </div>
+        `;
+
+        // Ensure initial state of charter buttons is correct based on isApproved and if data was loaded
+        const charterForm = document.getElementById('charterForm');
+        const editButton = charterForm.querySelector('.edit-btn');
+        const approveButton = charterForm.querySelector('.btn-approve');
+        const addStakeholderBtn = document.querySelector('.add-stakeholder-btn');
+
+        if (isApproved) {
+            charterForm.classList.add('approved');
+            // Inputs are already set to readonly in HTML if approved
+            editButton.textContent = 'View Charter'; // Change text if approved
+            editButton.disabled = true;
+            approveButton.disabled = true;
+            addStakeholderBtn.disabled = true;
+        } else {
+            charterForm.classList.remove('approved');
+            editButton.disabled = false; // Ensure button is enabled if not approved
+            approveButton.disabled = false;
+            addStakeholderBtn.disabled = false;
+
+            // If charter exists but is not approved, start in 'Edit' mode
+            // If charter doesn't exist, start in 'Save' mode (fields are editable)
+            if (charterExists) {
+                editButton.textContent = 'Edit Charter';
+                setCharterFormReadonly(true); // Make fields readonly initially if data loaded and not approved
+            } else {
+                editButton.textContent = 'Save Charter';
+                setCharterFormReadonly(false); // Make fields editable initially if no data loaded
+            }
+        }
+
+        // Set up event listeners for buttons after rendering
+        setupEventListeners(); // Consolidated event listener setup
+
+    }
+
+    // --- Helper function to set charter form readonly state ---
+    function setCharterFormReadonly(readonly) {
+        const form = document.getElementById('charterForm');
+        if (!form) return;
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.readOnly = readonly;
+             if (readonly) {
+                 input.classList.add('readonly'); // Optional: add a class for styling readonly inputs
+             } else {
+                  input.classList.remove('readonly');
+             }
+        });
+    }
+
+    // --- Save Project Charter ---
+    async function saveCharter() {
+        const form = document.getElementById('charterForm');
+        if (!form) return;
+        const editButton = form.querySelector('.edit-btn');
+
+        // Basic form validation
+        if (!form.checkValidity()) {
+            alert('Please fill in all required Project Charter fields.');
+            form.reportValidity(); // Show browser validation messages
+            return;
+        }
+
+        const charterData = {
+            // Assuming the backend associates the charter with the project via the projectId in the URL or body
+            // Include projectId in the body for clarity, especially for POST
+            projectId: parseInt(projectId, 10), // Ensure projectId is an integer if your backend expects it
+            projectname: document.getElementById('charterTitle').value,
+            sponsors: document.getElementById('charterSponsors').value,
+            objective: document.getElementById('charterObjective').value,
+            description: document.getElementById('charterDescription').value,
+            deliverables: document.getElementById('charterDeliverables').value,
+            // approved status is handled by the approveCharter function
+            approved: false // When saving via the 'Save Charter' button, it's not approved yet
+        };
+
+        const method = charterExists ? 'PUT' : 'POST';
+         // Adjust endpoint based on whether we're creating or updating
+         // Assuming PUT requires the projectId in the URL for the charter linked to that project
+        const endpoint = charterExists ? `/api/charter/${projectId}` : `/api/charter`;
+
+        try {
+             // Add a loading indicator
+             if(editButton) { // Check if button exists
+                 editButton.textContent = 'Saving...';
+                 editButton.disabled = true;
+             }
+             document.body.style.cursor = 'wait';
+
+
+            const result = await fetchFromBackend(endpoint, {
+                method: method,
+                body: JSON.stringify(charterData)
+            });
+
+            if (result || method === 'PUT') { // Assume PUT success even with empty result if status is 200/204
+                console.log('Charter saved successfully:', result);
+                alert('Project Charter saved successfully!');
+                charterExists = true; // Set to true after successful POST
+                 // After saving, switch back to 'Edit' mode
+                setCharterFormReadonly(true);
+                 if(editButton) {
+                     editButton.textContent = 'Edit Charter';
+                 }
+            } else {
+                 console.error('Save failed, unexpected result:', result);
+                 alert('Failed to save project charter. Please try again.');
+                  if(editButton) {
+                     editButton.textContent = 'Save Charter'; // Stay in Save mode on failure
+                  }
+            }
+        } catch (error) {
+            console.error('Error saving project charter:', error);
+            alert(`Error saving project charter: ${error.message}`);
+             if(editButton) {
+                 editButton.textContent = 'Save Charter'; // Stay in Save mode on failure
+             }
+        } finally {
+             if(editButton) {
+                 editButton.disabled = false; // Re-enable button
+             }
+             document.body.style.cursor = 'default';
+        }
+    }
+
+    // --- Toggle Charter Form Editability ---
+    function editCharter() {
+        const form = document.getElementById('charterForm');
+         if (!form) return;
+        const editButton = form.querySelector('.edit-btn');
+         if (!editButton) return;
+
+        if (form.classList.contains('approved')) {
+             alert('Approved charters cannot be edited.');
+             return;
+        }
+
+        // Toggle between 'Edit' and 'Save' states
+        if (editButton.textContent === 'Edit Charter') {
+            // Switch to 'Save' mode
+            setCharterFormReadonly(false);
+            editButton.textContent = 'Save Charter';
+            // Focus the first editable field
+            const firstEditableField = form.querySelector('input:not([readonly]), textarea:not([readonly])');
+             if(firstEditableField) {
+                 firstEditableField.focus();
+             }
+        } else {
+            // Currently in 'Save' mode, trigger save action
+            saveCharter();
+        }
+    }
+
+    // --- Approve Charter (Placeholder - requires backend logic) ---
+     async function approveCharter() {
+         const form = document.getElementById('charterForm');
+          if (!form) return;
+         const approveButton = form.querySelector('.btn-approve');
+         if (!approveButton) return;
+
+
+         if (form.classList.contains('approved')) {
+             alert('Charter is already approved.');
+             return;
+         }
+
+          // Ensure charter is saved before approving
+         const saveButton = form.querySelector('.edit-btn');
+         if (saveButton && saveButton.textContent === 'Save Charter') {
+             alert('Please save the charter before approving.');
+             return;
+         }
+
+         if (!confirm('Are you sure you want to approve the Project Charter? This action cannot be undone, and the charter will become read-only.')) {
+             return; // User cancelled
+         }
+
+         try {
+
+              approveButton.textContent = 'Approving...';
+              approveButton.disabled = true;
+              document.body.style.cursor = 'wait';
+
+
+             // Assuming a PUT request to update the 'approved' status
+             // This will send the current charter data with approved: true
+             const charterData = {
+                 // Assuming the backend associates the charter with the project via the projectId
+                 projectId: parseInt(projectId, 10),
+                 projectname: document.getElementById('charterTitle').value,
+                 sponsors: document.getElementById('charterSponsors').value,
+                 objective: document.getElementById('charterObjective').value,
+                 description: document.getElementById('charterDescription').value,
+                 deliverables: document.getElementById('charterDeliverables').value,
+                 approved: true // Set approved to true
+             };
+
+             // Use PUT method to update the existing charter
+              // Assuming PUT requires the projectId in the URL for the charter linked to that project
+             const result = await fetchFromBackend(`/api/charter/${projectId}`, {
+                 method: 'PUT',
+                 body: JSON.stringify(charterData)
+             });
+
+             if (result || result === null) { // Accept null for 204 as per fetchFromBackend
+                 console.log('Charter approved successfully:', result);
+                 alert('Project Charter approved!');
+                 // Visually update the UI to approved state
+                 form.classList.add('approved');
+                 setCharterFormReadonly(true);
+                 const approvedBanner = form.querySelector('.approved-banner');
+                  if(approvedBanner) approvedBanner.style.display = 'block';
+
+                 const editBtn = form.querySelector('.edit-btn');
+                 if(editBtn) editBtn.style.display = 'none'; // Hide Edit/Save button
+                 if(approveButton) approveButton.style.display = 'none'; // Hide Approve button
+
+                 const addStakeholderBtn = document.querySelector('.add-stakeholder-btn');
+                  if(addStakeholderBtn) addStakeholderBtn.disabled = true; // Disable adding stakeholders
+
+                  // Disable edit/remove buttons on existing stakeholder rows
+                 const stakeholderActionButtons = document.querySelectorAll('.stakeholder-table .actions .action-btn');
+                 stakeholderActionButtons.forEach(button => button.disabled = true);
+
+
+             } else {
+                  console.error('Approval failed, no result:', result);
+                  alert('Failed to approve project charter. Please try again.');
+             }
+
+         } catch (error) {
+             console.error('Error approving project charter:', error);
+             alert(`Error approving project charter: ${error.message}`);
+         } finally {
+              if(approveButton) {
+                  approveButton.textContent = 'Approve Charter';
+                  approveButton.disabled = false;
+              }
+              document.body.style.cursor = 'default';
+         }
+     }
+
+
+    // --- Stakeholder Actions ---
+
+    // Add event listeners after the DOM is loaded or dynamic content is updated
+    function setupEventListeners() {
+        // Charter button listeners (using event delegation on the form)
+        const charterForm = document.getElementById('charterForm');
+        if (charterForm) {
+            charterForm.addEventListener('click', function(event) {
+                 if (event.target.classList.contains('edit-btn')) {
+                     editCharter();
+                 } else if (event.target.classList.contains('btn-approve')) {
+                     approveCharter();
+                 }
+            });
+        }
+
+        // Add Stakeholder button listener
+        const addStakeholderBtn = document.querySelector('.add-stakeholder-btn');
+        if (addStakeholderBtn) {
+            addStakeholderBtn.addEventListener('click', addStakeholder);
+        }
+
+        // Stakeholder table row action listeners (using event delegation on the table body)
+        const stakeholderTableBody = document.getElementById('stakeholdersTableBody');
+        if (stakeholderTableBody) {
+             stakeholderTableBody.addEventListener('click', function(event) {
+                 const target = event.target;
+                 const row = target.closest('tr');
+                 if (!row) return;
+
+                 const stakeholderId = row.dataset.id ? parseInt(row.dataset.id, 10) : null;
+
+                 if (target.classList.contains('action-btn')) {
+                     if (target.classList.contains('edit')) {
+                         editStakeholder(event, stakeholderId);
+                     } else if (target.classList.contains('delete')) {
+                         removeStakeholder(event, stakeholderId);
+                     } else if (target.classList.contains('save')) {
+                         saveStakeholderRow(event, stakeholderId);
+                     } else if (target.classList.contains('cancel')) {
+                         // For cancel, we need the original data to revert.
+                         // Storing it in a data attribute or a JS object is better.
+                         // For now, if it's an existing row, loadInitiatingContent() is called in cancelStakeholderRow,
+                         // which re-fetches and re-renders, achieving the revert effect.
+                         // For new rows (stakeholderId is null), cancelStakeholderRow removes the row.
+                          cancelStakeholderRow(event, stakeholderId);
+                     }
+                 }
+             });
+        }
+         // Note: Inline onclick attributes have been removed from createStakeholderRowHtml
+         // and replaced with event delegation listeners here.
+    }
+
+
+    // Add a new stakeholder row
+    function addStakeholder() {
+        // Check if charter is approved - disable adding
+        const form = document.getElementById('charterForm');
+        if (form && form.classList.contains('approved')) {
+            alert('Stakeholders cannot be added after the charter is approved.');
+            return;
+        }
+
+        const stakeholderTableBody = document.getElementById('stakeholdersTableBody');
+        if (!stakeholderTableBody) return;
+
+        // Check if there is already a new row being added or another row being edited
+        if (stakeholderTableBody.querySelector('.new-stakeholder-row') ||
+            stakeholderTableBody.querySelector('.editing')) {
+            alert('Please save or cancel the current changes first.');
+            return;
+        }
+
+        // Remove the "No stakeholders added yet" message row if it exists
+        const noDataRow = document.getElementById('no-stakeholders-row');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+
+        // Create a blank stakeholder object for the new row
+        const newStakeholder = {
+            id: null, // Indicate it's a new stakeholder
+            name: '',
+            role: '',
+            contact: '',
+            influence: 'Low' // Default influence
+        };
+
+        // Create and append the new row HTML directly in edit mode
+        const newRowHtml = createStakeholderRowHtml(newStakeholder, false); // New rows are never approved
+        stakeholderTableBody.insertAdjacentHTML('beforeend', newRowHtml);
+
+        // Add 'editing' class to the new row element immediately after adding
+        const newRowElement = stakeholderTableBody.querySelector('.new-stakeholder-row:last-child');
+         if(newRowElement) {
+             newRowElement.classList.add('editing');
+             // Focus the first input in the new row
+             const firstInput = newRowElement.querySelector('input:first-child');
+             if (firstInput) {
+                 firstInput.focus();
+             }
+         }
+         // Event listeners for save/cancel on this new row will be handled by the delegated listener on tbody
+    }
+
+    // Initiate inline editing for a row
+    function editStakeholder(event, stakeholderId) {
+        event.stopPropagation();
+
+        // Check if charter is approved - disable editing
+        const form = document.getElementById('charterForm');
+        if (form && form.classList.contains('approved')) {
+            alert('Stakeholders cannot be edited after the charter is approved.');
+            return;
+        }
+
+        // Find the row element from the button's parent
+        const rowElement = event.target.closest('tr');
+        if (!rowElement) return;
+
+        // Check if another row is currently being added or edited
+        const stakeholderTableBody = document.getElementById('stakeholdersTableBody');
+        if (!stakeholderTableBody) return; // Ensure tbody exists
+
+        if (stakeholderTableBody.querySelector('.new-stakeholder-row') ||
+            stakeholderTableBody.querySelector('.editing')) {
+            alert('Please save or cancel the current changes first.');
+            return;
+        }
+
+        // Gather current data from the row
+        const stakeholder = {
+            id: stakeholderId,
+            name: rowElement.querySelector('td[data-field="name"]').textContent.trim(),
+            role: rowElement.querySelector('td[data-field="role"]').textContent.trim(),
+            contact: rowElement.querySelector('td[data-field="contact"]').textContent.trim(),
+            influence: rowElement.querySelector('td[data-field="influence"]').textContent.trim() // Use textContent for influence
+        };
+
+        // Convert the row to editable mode
+        makeStakeholderRowEditable(rowElement, stakeholder);
+    }
+
+    // Helper function to convert a stakeholder row to edit mode
+    function makeStakeholderRowEditable(rowElement, stakeholder) {
+        if (!rowElement) return;
+
+        // Get cells
+        const nameCell = rowElement.querySelector('td[data-field="name"]');
+        const roleCell = rowElement.querySelector('td[data-field="role"]');
+        const contactCell = rowElement.querySelector('td[data-field="contact"]');
+        const influenceCell = rowElement.querySelector('td[data-field="influence"]');
+        const actionsCell = rowElement.querySelector('td.actions');
+
+        if (!nameCell || !roleCell || !contactCell || !influenceCell || !actionsCell) {
+            console.error("Couldn't find all cells in stakeholder row.");
+            return;
+        }
+
+        // Store original data in a data attribute for easy cancellation
+         rowElement.dataset.originalData = JSON.stringify(stakeholder);
+
+        // Replace text content with inputs, preserving current value
+        nameCell.innerHTML = `<input type="text" value="${stakeholder.name || ''}" placeholder="Name" required>`;
+        roleCell.innerHTML = `<input type="text" value="${stakeholder.role || ''}" placeholder="Role">`;
+        contactCell.innerHTML = `<input type="text" value="${stakeholder.contact || ''}" placeholder="Contact">`;
+        influenceCell.innerHTML = `<input type="text" value="${stakeholder.influence || 'Low'}" placeholder="Influence">`; // Use input for editing
+
+
+        // Replace action buttons (buttons will be handled by delegated listener)
+        actionsCell.innerHTML = `
+            <button type="button" class="action-btn save">Save</button>
+            <button type="button" class="action-btn cancel">Cancel</button>
+        `;
+
+        // Add 'editing' class to the row
+        rowElement.classList.add('editing');
+
+        // Focus on the first input
+        const firstInput = rowElement.querySelector('input[type="text"]');
+         if(firstInput) {
+            firstInput.focus();
+         }
+    }
+
+
+    // Handle saving an inline edited/new stakeholder row
+    async function saveStakeholderRow(event, stakeholderId = null) {
+        event.stopPropagation();
+
+        const rowElement = event.target.closest('tr');
+        if (!rowElement) return;
+
+        const nameInput = rowElement.querySelector('td[data-field="name"] input');
+        const roleInput = rowElement.querySelector('td[data-field="role"] input');
+        const contactInput = rowElement.querySelector('td[data-field="contact"] input');
+        const influenceInput = rowElement.querySelector('td[data-field="influence"] input');
+
+
+        // Basic client-side validation
+        if (!nameInput || nameInput.value.trim() === '') {
+            alert('Stakeholder name is required.');
+            nameInput.focus();
+            return;
+        }
+
+        const stakeholderData = {
+            id: stakeholderId, // Will be null for new rows
+            projectId: parseInt(projectId, 10), // Always associate with the project
+            name: nameInput.value.trim(),
+            role: roleInput ? roleInput.value.trim() : '',
+            contact: contactInput ? contactInput.value.trim() : '',
+            influence: influenceInput ? influenceInput.value.trim() || 'Low' : 'Low' // Default if empty
+        };
+
+        // Call the saveStakeholder function which handles the API call
+        await saveStakeholder(stakeholderData);
+         // After successful save, loadInitiatingContent is called, which re-renders the table
+         // and removes the editing state, so no further UI manipulation is needed here.
+    }
+
+    // Handle canceling inline editing for a row
+    function cancelStakeholderRow(event, stakeholderId = null) {
+        event.stopPropagation();
+
+        const rowElement = event.target.closest('tr');
+        if (!rowElement) return;
+
+        const stakeholderTableBody = document.getElementById('stakeholdersTableBody');
+         if (!stakeholderTableBody) return; // Ensure tbody exists
+
+
+        if (stakeholderId === null) {
+            // It's a new row, just remove it
+            rowElement.remove();
+
+            // Check if the table is empty now
+            if (stakeholderTableBody.children.length === 0) {
+                // Add back the "No stakeholders" message
+                const isApproved = document.getElementById('charterForm').classList.contains('approved');
+                stakeholderTableBody.innerHTML = `
+                    <tr id="no-stakeholders-row">
+                        <td colspan="5" class="no-data">
+                            ${isApproved ?
+                              'No stakeholders were added.' :
+                              'No stakeholders added yet. Click "Add Stakeholder" below.'}
+                        </td>
+                    </tr>
+                `;
+            }
+        } else {
+            // It's an existing row being edited, revert it to view mode
+             // Retrieve original data from the data attribute
+             const originalData = rowElement.dataset.originalData ? JSON.parse(rowElement.dataset.originalData) : null;
+
+            if (originalData) {
+                // Revert the cell content to the original data
+                rowElement.querySelector('td[data-field="name"]').innerHTML = originalData.name;
+                rowElement.querySelector('td[data-field="role"]').innerHTML = originalData.role;
+                rowElement.querySelector('td[data-field="contact"]').innerHTML = originalData.contact;
+                 // Use the original influence text for display, and value for data-value
+                rowElement.querySelector('td[data-field="influence"]').innerHTML = originalData.influence;
+                rowElement.querySelector('td[data-field="influence"]').setAttribute('data-value', originalData.influence);
+
+
+                // Restore action buttons
+                const actionsCell = rowElement.querySelector('.actions');
+                const isApproved = document.getElementById('charterForm').classList.contains('approved');
+                actionsCell.innerHTML = isApproved ?
+                    `` :
+                    `<button type="button" class="action-btn edit" data-id="${stakeholderId}">Edit</button>
+                     <button type="button" class="action-btn delete" data-id="${stakeholderId}">Remove</button>`;
+
+                 // Remove the editing class and original data attribute
+                 rowElement.classList.remove('editing');
+                 delete rowElement.dataset.originalData;
+
+                 // Re-attach event listeners for the restored buttons
+                 setupEventListeners(); // Re-run full setup, or a more targeted one if needed
+            } else {
+                 // If original data wasn't found, reload the whole section as a fallback
+                 console.warn("Original stakeholder data not found for cancellation, reloading section.");
+                 loadInitiatingContent();
+            }
+        }
+    }
+/*
+    // Save stakeholder to backend (POST for new, PUT for update)
+    async function saveStakeholder(stakeholderData) {
+        let method = 'POST';
+        let endpoint = `/api/stakeholders`; // Endpoint for creating new stakeholders
+        let successMessage = 'Stakeholder added successfully';
+        let rowElement = null; // Variable to hold the row being saved for potential updates
+
+        // If we have an ID, it's an update
+        if (stakeholderData.id) {
+            method = 'PUT';
+            endpoint = `${endpoint}/${stakeholderData.id}`; // Endpoint for updating a specific stakeholder
+            successMessage = 'Stakeholder updated successfully';
+             // Find the row element that matches the stakeholderId being saved
+             rowElement = document.querySelector(`tr[data-id="${stakeholderData.id}"]`);
+        } else {
+            // If it's a new stakeholder (POST), find the new row element
+            rowElement = document.querySelector('.new-stakeholder-row');
+        }
+
+        // Add loading indicators to the specific row's buttons
+        if(rowElement) {
+            const saveBtn = rowElement.querySelector('.save');
+            const cancelBtn = rowElement.querySelector('.cancel');
+            if(saveBtn) {
+                 saveBtn.textContent = 'Saving...';
+                 saveBtn.disabled = true;
+            }
+             if(cancelBtn) cancelBtn.disabled = true;
+        }
+         document.body.style.cursor = 'wait';
+
+
+        try {
+            const result = await fetchFromBackend(endpoint, {
+                method,
+                body: JSON.stringify(stakeholderData)
+            });
+
+            // Assuming a successful response for POST returns the created stakeholder with ID
+            // and PUT returns either the updated stakeholder or a success status (like 200 or 204)
+            if (result || method === 'PUT') {
+                console.log('Stakeholder saved:', result);
+                alert(successMessage);
+
+                // Reload the initiating content to reflect changes in the table
+                // This will re-fetch all stakeholders and re-render the table,
+                // effectively updating the row or adding the new one in view mode.
+                await loadInitiatingContent();
+
+            } else {
+                console.error('Stakeholder save failed, unexpected result:', result);
+                alert('Failed to save stakeholder. Please try again.');
+                 // Re-enable buttons and restore text on failure for the specific row
+                 if(rowElement) {
+                     const saveBtn = rowElement.querySelector('.save');
+                     const cancelBtn = rowElement.querySelector('.cancel');
+                      if(saveBtn) saveBtn.textContent = 'Save';
+                      if(cancelBtn) cancelBtn.disabled = false;
+                 }
+            }
+
+        } catch (error) {
+            console.error('Error saving stakeholder:', error);
+            alert(`Error saving stakeholder: ${error.message}`);
+             // Re-enable buttons and restore text on failure for the specific row
+             if(rowElement) {
+                 const saveBtn = rowElement.querySelector('.save');
+                 const cancelBtn = rowElement.querySelector('.cancel');
+                  if(saveBtn) saveBtn.textContent = 'Save';
+                  if(cancelBtn) cancelBtn.disabled = false;
+             }
+        } finally {
+             // Ensure cursor is reset, regardless of individual row buttons
+             document.body.style.cursor = 'default';
+        }
+    }
+        */
+        async function saveStakeholder(stakeholderData) {
+          let method = 'POST';
+          let endpoint = `/api/stakeholders`;
+          let successMessage = 'Stakeholder added successfully';
+          let rowElement = null;
+      
+          // Determine if it's an update
+          if (stakeholderData.id) {
+              method = 'PUT';
+              endpoint = `${endpoint}/${stakeholderData.id}`;
+              successMessage = 'Stakeholder updated successfully';
+              rowElement = document.querySelector(`tr[data-id="${stakeholderData.id}"]`);
+          } else {
+              rowElement = document.querySelector('.new-stakeholder-row');
+          }
+      
+          // Basic validation (adjust based on your required fields)
+          if (!stakeholderData.name || !stakeholderData.role) {
+              alert('Please fill in all required fields (e.g. name and role).');
+              return;
+          }
+      
+          // Add loading state to row buttons
+          if (rowElement) {
+              const saveBtn = rowElement.querySelector('.save');
+              const cancelBtn = rowElement.querySelector('.cancel');
+              if (saveBtn) {
+                  saveBtn.textContent = 'Saving...';
+                  saveBtn.disabled = true;
+              }
+              if (cancelBtn) cancelBtn.disabled = true;
+          }
+      
+          document.body.style.cursor = 'wait';
+      
+          try {
+              const response = await fetchFromBackend(endpoint, {
+                  method,
+                  body: JSON.stringify(stakeholderData)
+              });
+      
+              // If response is not OK, throw to trigger catch
+              if (!response || response.status >= 400) {
+                  throw new Error(`Server returned status ${response?.status || 'unknown'}`);
+              }
+      
+              const result = await response.json?.(); // In case backend returns data
+              console.log('Stakeholder saved:', result);
+              alert(successMessage);
+      
+              // Refresh content to reflect updated data
+              await loadInitiatingContent();
+      
+          } catch (error) {
+              console.error('Error saving stakeholder:', error);
+              alert(`Error saving stakeholder: ${error.message}`);
+          } finally {
+              document.body.style.cursor = 'default';
+      
+              // Re-enable and reset row buttons
+              if (rowElement) {
+                  const saveBtn = rowElement.querySelector('.save');
+                  const cancelBtn = rowElement.querySelector('.cancel');
+                  if (saveBtn) {
+                      saveBtn.textContent = 'Save';
+                      saveBtn.disabled = false;
+                  }
+                  if (cancelBtn) cancelBtn.disabled = false;
+              }
+          }
+      }
+      
+
+    // Remove stakeholder from backend
+    async function deleteStakeholder(stakeholderId) {
+         const rowElement = document.querySelector(`tr[data-id="${stakeholderId}"]`);
+         if (!rowElement) return;
+
+         // Add loading indicator to the delete button
+         const deleteButton = rowElement.querySelector('.delete');
+         if(deleteButton) {
+             deleteButton.textContent = 'Removing...';
+             deleteButton.disabled = true;
+         }
+         document.body.style.cursor = 'wait';
+
+        try {
+             // Assuming DELETE request to /api/stakeholders/{id}
+            const result = await fetchFromBackend(`/api/stakeholders/${stakeholderId}`, {
+                method: 'DELETE'
+            });
+
+            // fetchFromBackend with DELETE might return 204 No Content or a success JSON
+            if (result || result === null) { // Accept null for 204 as per fetchFromBackend
+                console.log(`Stakeholder ${stakeholderId} removed successfully.`);
+                alert('Stakeholder removed successfully');
+
+                // Reload the initiating content to reflect changes in the table
+                await loadInitiatingContent();
+
+            } else {
+                console.error('Stakeholder removal failed, unexpected result:', result);
+                alert('Failed to remove stakeholder. Please try again.');
+                 // Re-enable button and restore text on failure
+                 if(deleteButton) {
+                     deleteButton.textContent = 'Remove';
+                     deleteButton.disabled = false;
+                 }
+            }
+        } catch (error) {
+            console.error('Error deleting stakeholder:', error);
+            alert(`Error removing stakeholder: ${error.message}`);
+             // Re-enable button and restore text on failure
+             if(deleteButton) {
+                 deleteButton.textContent = 'Remove';
+                 deleteButton.disabled = false;
+             }
+        } finally {
+             document.body.style.cursor = 'default';
+        }
+    }
+
+
+    // Placeholder functions for other phases - These will typically involve redirects as per setupPhaseNavigation
+    async function loadPlanningContent() { /* Content loaded via planning.html */ }
+    async function loadExecutingContent() { /* Content loaded via executing.html */ }
+    async function loadMonitoringContent() { /* Content loaded via monitoring.html */ }
+    async function loadClosingContent() { /* Content loaded via closing.html */ }
+
+  </script>
+  
+
+</body>
+</html>
